@@ -1,4 +1,4 @@
-package model;
+package entity;
 
 // This represents a single instance of the dataset
 public class Class {

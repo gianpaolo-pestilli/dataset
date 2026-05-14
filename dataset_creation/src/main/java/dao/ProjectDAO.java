@@ -1,7 +1,6 @@
 package dao;
 
 import exception.PersistenceException;
-import view.UserInterface;
 
 import java.io.FileInputStream;
 import java.io.IOException;

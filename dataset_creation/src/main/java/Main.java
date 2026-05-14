@@ -1,8 +1,13 @@
+import boundary.JiraInteraction;
 
 public class Main {
 
     public static void main(String[] args) {
-        ApplicationStarter.launch();
+        try{
+            JiraInteraction.printTicket();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        // ApplicationStarter.launch();
     }
-
 }
