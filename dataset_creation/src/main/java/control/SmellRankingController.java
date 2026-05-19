@@ -1,21 +1,23 @@
 package control;
 
-import exception.ControllerException;
+import bean.ClassesBean;
+import dao.ClassesDAO;
+import dao.SmellClassesDAO;
+import java.util.List;
 
-public class SmellRankingController implements AppController {
-
-    @Override
-    public void start() throws ControllerException{
-        //To complete
-    }
+public class SmellRankingController extends RankingController {
 
     @Override
-    public void finish() throws ControllerException {
-        //To complete
+    protected void sortRanking(){
+        List<ClassesBean> classes = ranking;
+        classes.sort((c1, c2) -> c2.getNumSmell().compareTo(c1.getNumSmell()));
+        for(ClassesBean c : classes){
+            c.setTimeSmell(null);
+        }
+        setRanking(classes);
     }
-
-    private void nSmellRanking(){
-        // To be completed
+    @Override
+    protected ClassesDAO getMyClassDAO(){
+        return new SmellClassesDAO();
     }
-
 }

@@ -2,7 +2,7 @@ package control;
 
 import exception.ControllerException;
 
-public class DatasetCreatorController implements AppController{
+public class DatasetCreatorController extends AppController{
 
     @Override
     public void start() throws ControllerException {
