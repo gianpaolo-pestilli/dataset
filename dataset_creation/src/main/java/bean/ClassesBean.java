@@ -7,6 +7,7 @@ public class ClassesBean {
     private String releaseVersion;
     private Integer numSmell;
     private Integer timeSmell; // in minutes
+    private Integer debt; // timeSmell scaled by the size (SonarCloud definition)
 
     public ClassesBean(){}
 
@@ -14,13 +15,15 @@ public class ClassesBean {
                        String className,
                        String releaseVersion,
                        Integer numSmell,
-                       Integer timeSmell /*in minutes*/
+                       Integer timeSmell, /*in minutes*/
+                       Integer debt
     ) {
         this.projectName = projectName;
         this.className = className;
         this.releaseVersion = releaseVersion;
         this.numSmell = numSmell;
         this.timeSmell = timeSmell;
+        this.debt = debt;
     }
 
     public String getProjectName() {
@@ -61,6 +64,14 @@ public class ClassesBean {
 
     public void setTimeSmell(Integer timeSmell) {
         this.timeSmell = timeSmell;
+    }
+
+    public Integer getDebt() {
+        return debt;
+    }
+
+    public void setDebt(Integer debt) {
+        this.debt = debt;
     }
 
 }

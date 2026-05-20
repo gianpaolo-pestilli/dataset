@@ -1,8 +1,5 @@
 package settings;
-import control.AppController;
-import control.DatasetCreatorController;
-import control.EffortRankingController;
-import control.SmellRankingController;
+import control.*;
 import exception.ConfigException;
 
 import java.io.*;
@@ -33,6 +30,7 @@ public class PropertiesSetter {
                 case DATASET -> {return new DatasetCreatorController();}
                 case SMELL_RANKING -> {return new SmellRankingController();}
                 case EFFORT_RANKING -> {return new EffortRankingController();}
+                case DEBT_RANKING -> {return new DebtRankingController();}
                 default -> throw new ConfigException("Invalid controller parameters");
             }
 
@@ -138,6 +136,50 @@ public class PropertiesSetter {
 
         } catch (IOException e) {
             throw new ConfigException("Failed to read smells-ranking.file from config.properties: " + e.getMessage());
+        }
+    }
+
+    public static String getDebtRankingFile() throws ConfigException {
+        Properties prop = new Properties();
+        try (InputStream input = new FileInputStream(fileName)) {
+            prop.load(input);
+            String file = prop.getProperty("debt-ranking.file");
+            String number = prop.getProperty("debt-ranking.count");
+            String touched = prop.getProperty("debt-ranking.touched");
+            Integer written = Integer.parseInt(touched);
+            String to_update;
+            Integer newOne = Integer.parseInt(number);
+            if(written == 1){
+                newOne++;
+                prop.setProperty("debt-ranking.touched", "0");
+            }
+
+            to_update = String.valueOf(newOne);
+            prop.setProperty("debt-ranking.count", to_update);
+
+            try(OutputStream output = new FileOutputStream(fileName)){
+                prop.store(output,null);
+            }
+
+            return file + number + ".csv";
+
+        } catch (IOException e) {
+            throw new ConfigException("Failed to read debt-ranking.file from config.properties: " + e.getMessage());
+        }
+    }
+
+    public static void writtenOnDebt() throws ConfigException{
+        Properties prop = new Properties();
+        try (InputStream input = new FileInputStream(fileName)) {
+            prop.load(input);
+            String touched = "1";
+            prop.setProperty("debt-ranking.touched", touched);
+            try(OutputStream output = new FileOutputStream(fileName)){
+                prop.store(output,null);
+            }
+
+        } catch (IOException e) {
+            throw new ConfigException("Failed to read debt-ranking.file from config.properties: " + e.getMessage());
         }
     }
 

@@ -98,6 +98,13 @@ public class UserInterface {
             sb.append(Time);
         }
 
+        Integer debt = classBean.getDebt();
+        if(debt != null){
+            String Debt = debt.toString();
+            Debt = ANSI_CYAN + "Debito tecnico = " + Debt + ANSI_RESET;
+            sb.append(Debt);
+        }
+
         String toPrint = sb.toString();
         System.out.println("----------------------------------------------------------");
         System.out.println(toPrint);

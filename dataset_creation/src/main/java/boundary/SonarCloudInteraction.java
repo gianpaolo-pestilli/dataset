@@ -20,6 +20,7 @@ public class SonarCloudInteraction {
     private static final String SONAR_API_BASE = "https://sonarcloud.io/api/measures/component_tree";
     private static final String METRIC_SMELLS  = "code_smells";
     private static final String METRIC_EFFORT  = "sqale_index";
+    private static final String METRIC_TECHNICAL_DEBT_RATIO = "sqale_debt_ratio";
     private static final int    PAGE_SIZE      = 500;
 
 
@@ -93,6 +94,24 @@ public class SonarCloudInteraction {
         return 0;
     }
 
+    // Reading the decimal metric value (for Technical debt ratio)...
+    private static double extractDecimalMetricValue(JSONObject component, String metricName) {
+        JSONArray measures = component.optJSONArray("measures");
+        if (measures == null) return 0.0;
+
+        for (int i = 0; i < measures.length(); i++) {
+            JSONObject measure = measures.getJSONObject(i);
+            if (metricName.equals(measure.getString("metric"))) {
+                try {
+                    return Double.parseDouble(measure.optString("value", "0.0"));
+                } catch (NumberFormatException e) {
+                    return 0.0;
+                }
+            }
+        }
+        return 0.0;
+    }
+
     // Getting all the classes in any order...
     public static List<ClassesBean> getAllClasses(String releaseVersion) throws SonarException {
         String projectKey;
@@ -106,15 +125,21 @@ public class SonarCloudInteraction {
 
         List<ClassesBean> result = new ArrayList<>();
 
-        List<JSONObject> components = fetchAllComponents(projectKey, METRIC_SMELLS + "," + METRIC_EFFORT);
+        List<JSONObject> components = fetchAllComponents(projectKey, METRIC_SMELLS + "," + METRIC_EFFORT + "," + METRIC_TECHNICAL_DEBT_RATIO);
 
         for (JSONObject component : components) {
             String path = component.optString("path", "");
             if (isTestClass(path)) continue;
 
+            // Extract Technical debt ratio as an integer (multiplied by 100 for precision)
+            double technicalDebtRatio = extractDecimalMetricValue(component, METRIC_TECHNICAL_DEBT_RATIO);
+            int debtRatioAsInt = (int) (technicalDebtRatio * 100);
+
             ClassesBean c = new ClassesBean(projectName, path, releaseVersion,
                     extractMetricValue(component, METRIC_SMELLS),
-                    extractMetricValue(component, METRIC_EFFORT));
+                    extractMetricValue(component, METRIC_EFFORT),
+                    debtRatioAsInt
+            );
             result.add(c);
         }
 

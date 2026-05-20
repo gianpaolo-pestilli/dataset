@@ -13,6 +13,7 @@ public class SmellRankingController extends RankingController {
         classes.sort((c1, c2) -> c2.getNumSmell().compareTo(c1.getNumSmell()));
         for(ClassesBean c : classes){
             c.setTimeSmell(null);
+            c.setDebt(null);
         }
         setRanking(classes);
     }

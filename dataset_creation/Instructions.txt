@@ -5,6 +5,7 @@ controller.type=SMELL_RANKING
         DATASET,
         EFFORT_RANKING,
         SMELL_RANKING
+        DEBT_RANKING
 
 effort-ranking.count=0
     To avoid overriding previous files with new releases
