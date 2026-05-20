@@ -133,12 +133,11 @@ public class SonarCloudInteraction {
 
             // Extract Technical debt ratio as an integer (multiplied by 100 for precision)
             double technicalDebtRatio = extractDecimalMetricValue(component, METRIC_TECHNICAL_DEBT_RATIO);
-            int debtRatioAsInt = (int) (technicalDebtRatio * 100);
 
             ClassesBean c = new ClassesBean(projectName, path, releaseVersion,
                     extractMetricValue(component, METRIC_SMELLS),
                     extractMetricValue(component, METRIC_EFFORT),
-                    debtRatioAsInt
+                    technicalDebtRatio
             );
             result.add(c);
         }

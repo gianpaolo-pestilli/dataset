@@ -13,9 +13,9 @@ public class DebtRankingController extends RankingController{
         List<ClassesBean> classes = ranking;
 
         classes.sort((c1, c2) -> {
-            int t1 = c1.getDebt() != null ? c1.getDebt() : 0;
-            int t2 = c2.getDebt() != null ? c2.getDebt() : 0;
-            return Integer.compare(t2, t1);
+            Double t1 = c1.getDebt() != null ? c1.getDebt() : 0;
+            Double t2 = c2.getDebt() != null ? c2.getDebt() : 0;
+            return Double.compare(t2, t1);
         });
 
         setRanking(classes);

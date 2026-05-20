@@ -2,11 +2,14 @@ package boundary;
 
 import bean.ClassesBean;
 import bean.MessageBean;
+import bean.ReleaseBean;
 import control.AppController;
 import exception.ConfigException;
 import exception.ControllerException;
 import settings.PropertiesSetter;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 public class UserInterface {
@@ -98,7 +101,7 @@ public class UserInterface {
             sb.append(Time);
         }
 
-        Integer debt = classBean.getDebt();
+        Double debt = classBean.getDebt();
         if(debt != null){
             String Debt = debt.toString();
             Debt = ANSI_CYAN + "Debito tecnico = " + Debt + ANSI_RESET;
@@ -178,5 +181,41 @@ public class UserInterface {
         }
 
         return result.toString();
+    }
+
+    public void printReleases(List<ReleaseBean> list){
+        int i = 0;
+        for(ReleaseBean release : list){
+            printRelease(release, i);
+            i++;
+        }
+    }
+
+    private void printRelease(ReleaseBean rel, int i){
+
+        StringBuilder sb = new StringBuilder();
+        String n = String.valueOf(i);
+
+        n = ANSI_YELLOW + n + ": " + ANSI_RESET;
+
+        String project = rel.getProjectName();
+        project = ANSI_PURPLE + "Progetto = " + project + "--> " + ANSI_RESET;
+
+        String releaseID = rel.getID();
+        releaseID = "Release = " + releaseID + "; ";
+
+        String version = rel.getVersion();
+        version = "Versione = " + version + "; ";
+
+        DateTimeFormatter format = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        LocalDate releaseDate = rel.getReleaseDate();
+        String date = releaseDate.format(format);
+        date = ANSI_GREEN + "Rilasciata in data = " + date + "; " + ANSI_RESET;
+        sb.append(n+project+releaseID+version+date);
+
+        String toPrint = sb.toString();
+        System.out.println("----------------------------------------------------------");
+        System.out.println(toPrint);
+        System.out.println("----------------------------------------------------------");
     }
 }

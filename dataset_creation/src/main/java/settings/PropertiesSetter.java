@@ -27,7 +27,7 @@ public class PropertiesSetter {
             ControllerType controller = ControllerType.valueOf(controlType);
 
             switch (controller){
-                case DATASET -> {return new DatasetCreatorController();}
+                case DATASET -> {return new DatasetController();}
                 case SMELL_RANKING -> {return new SmellRankingController();}
                 case EFFORT_RANKING -> {return new EffortRankingController();}
                 case DEBT_RANKING -> {return new DebtRankingController();}
