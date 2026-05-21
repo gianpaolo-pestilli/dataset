@@ -12,6 +12,7 @@ import settings.PropertiesSetter;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public abstract class RankingController extends AppController {
 
@@ -47,6 +48,11 @@ public abstract class RankingController extends AppController {
 
         setRanking(list);
 
+        // In the list there are also files that are not .java  files
+        // We want to cut them away
+
+        filterJava();
+
         // The classes will be sorted according to the son, if it's a SmellRanking every timeSmell field will be null
         sortRanking();
 
@@ -62,6 +68,12 @@ public abstract class RankingController extends AppController {
         } catch (PersistenceException e) {
             throw new ControllerException("Error while writing output classes: " + e.getMessage());
         }
+    }
+
+    private void filterJava(){
+        ranking = ranking.stream()
+                .filter(cb -> cb.getClassName() != null && cb.getClassName().endsWith(".java"))
+                .collect(Collectors.toList());
     }
 
     protected void setRanking(List<ClassesBean> classes){
