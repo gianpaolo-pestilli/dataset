@@ -1,5 +1,6 @@
 package control;
 
+import bean.ProjectInfoBean;
 import boundary.SonarCloudInteraction;
 import bean.ClassesBean;
 import bean.MessageBean;
@@ -23,9 +24,11 @@ public abstract class RankingController extends AppController {
     public void start() throws ControllerException {
         String filename;
         String projectName;
+        String projectKey;
         try{
             filename = myDAO.getOutputFile();
             projectName = PropertiesSetter.getProjectName();
+            projectKey = PropertiesSetter.getSonarKey();
 
         } catch (ConfigException | PersistenceException e){
             throw new ControllerException("Error while retrieving the output file name: " + e.getMessage());
@@ -41,7 +44,14 @@ public abstract class RankingController extends AppController {
         List<ClassesBean> list;
         try {
             String currentVersion = SonarCloudInteraction.getCurrentReleaseVersion();
-            list = SonarCloudInteraction.getAllClasses(currentVersion); // To complete
+
+            ProjectInfoBean param = new ProjectInfoBean(
+                    projectKey,
+                    projectName,
+                    currentVersion
+            );
+
+            list = SonarCloudInteraction.getAllClasses(param); // To complete
         } catch (SonarException e) {
             throw new ControllerException("Error while retrieving classes: " + e.getMessage());
         }

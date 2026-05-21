@@ -1,6 +1,7 @@
 package boundary;
 
 import bean.ClassesBean;
+import bean.ProjectInfoBean;
 import exception.ConfigException;
 import exception.SonarException;
 import org.json.JSONArray;
@@ -113,15 +114,11 @@ public class SonarCloudInteraction {
     }
 
     // Getting all the classes in any order...
-    public static List<ClassesBean> getAllClasses(String releaseVersion) throws SonarException {
-        String projectKey;
-        String projectName;
-        try{
-            projectKey = PropertiesSetter.getSonarKey();
-            projectName = PropertiesSetter.getProjectName();
-        } catch (ConfigException e) {
-            throw new SonarException(e.getMessage());
-        }
+    public static List<ClassesBean> getAllClasses(ProjectInfoBean info) throws SonarException {
+
+        String projectKey = info.getProjectKey();
+        String projectName = info.getProjectName();
+        String releaseVersion = info.getReleaseVersion();
 
         List<ClassesBean> result = new ArrayList<>();
 

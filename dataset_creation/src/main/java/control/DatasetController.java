@@ -1,12 +1,16 @@
 package control;
 
 import bean.MessageBean;
+import bean.ProjectInfoBean;
 import bean.ReleaseBean;
+import boundary.GitInteraction;
+import boundary.JiraInteraction;
 import dao.DatasetDAO;
-import exception.ConfigException;
-import exception.ControllerException;
+import dao.ReleaseDAO;
+import exception.*;
 import settings.PropertiesSetter;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,17 +31,18 @@ public class DatasetController extends AppController {
     public void start() throws ControllerException {
         String filename;
         String projectName;
+        String projectKey;
         try {
             filename = DatasetDAO.getFilename();
             projectName = PropertiesSetter.getProjectName();
+            projectKey = PropertiesSetter.getSonarKey();
 
         } catch (ConfigException e) {
             throw new ControllerException("Error while retrieving the file: " + e.getMessage());
         }
 
-        MessageBean mess = new MessageBean("Everything you will see will also be written into this file: "
-                + filename);
-        userBoundary.printMessage(mess);
+
+        MessageBean mess;
 
         mess = new MessageBean("Analyzing the project: " + projectName + "...");
         userBoundary.printMessage(mess);
@@ -45,18 +50,30 @@ public class DatasetController extends AppController {
         mess = new MessageBean("\nFiltering releases...");
         userBoundary.printMessage(mess);
 
-        /* This needs to be developed
-        // Need to understand if projectName is needed to call this methods
-        List<ReleaseBean> fromGit = GitInteraction.getAllReleases();
-        List<ReleaseBean> fromJira = JiraInteraction.getAllReleases();
+        mess = new MessageBean("Everything you will see will also be written into a file");
+        userBoundary.printMessage(mess);
 
-        // BOTH THE GETALL-RELEASES METHODS DON'T RETURN OTHER BRANCHES DIFFERENT FROM MAIN ONE
-        // THEY ONLY RETURN THE OFFICIAL RELEASES COMMITTED, NOT EVERY COMMITTED RELEASE.
-        // In other words, versions ending with "incubating" or "SNAPSHOT", ... are absent
+        ProjectInfoBean param = new ProjectInfoBean(
+                projectKey,
+                projectName,
+                null
+        );
+
+        List<ReleaseBean> fromGit;
+        List<ReleaseBean> fromJira;
+
+        // Both "getAll" methods return all the releases they know
+        // We filter only the official ones, present in list from Jira AND in list from Git
+        try {
+            fromJira = JiraInteraction.getAllReleases(param);
+            fromGit = GitInteraction.getAllReleases(param);
+        } catch (JiraException | GitException e) {
+            throw new ControllerException("Can't retrieve the releases: " + e.getMessage());
+        }
+
 
         filterReleases(fromJira, fromGit);
 
-        */
 
         // Printing the user only the considered releases
         userBoundary.printReleases(releases);
@@ -66,7 +83,11 @@ public class DatasetController extends AppController {
     public void finish() throws ControllerException {
 
         // We write on a file the used releases to allow more repetitions of this experiment
-
+        try {
+            ReleaseDAO.writeReleases(releases);
+        } catch (PersistenceException e) {
+            throw new ControllerException(e.getMessage());
+        }
     }
 
 
