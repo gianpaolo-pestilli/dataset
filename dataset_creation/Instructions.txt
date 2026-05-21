@@ -1,6 +1,6 @@
 HOW TO USE THE config.properties file:
 
-controller.type=SMELL_RANKING
+application.type=SMELL_RANKING
     It may be one of the following:
         DATASET,
         EFFORT_RANKING,
@@ -30,3 +30,9 @@ project.name=SYNCOPE
 
 sonar.project.key=gianpaolo-pestilli_syncope2
     The project key in SonarQube
+
+project.owner=gianpaolo-pestilli
+    The owner of the repository
+
+project.repo=syncope
+    The name of the repository

@@ -1,7 +1,7 @@
 package control;
 
 import bean.ProjectInfoBean;
-import boundary.SonarCloudInteraction;
+import boundary.api.SonarCloudInteraction;
 import bean.ClassesBean;
 import bean.MessageBean;
 import dao.ClassesDAO;
@@ -48,7 +48,9 @@ public abstract class RankingController extends AppController {
             ProjectInfoBean param = new ProjectInfoBean(
                     projectKey,
                     projectName,
-                    currentVersion
+                    currentVersion,
+                    null,
+                    null
             );
 
             list = SonarCloudInteraction.getAllClasses(param); // To complete

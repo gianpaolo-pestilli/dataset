@@ -1,6 +1,6 @@
 package settings;
 
-public enum ControllerType {
+public enum ApplicationType {
     DATASET,
     EFFORT_RANKING,
     SMELL_RANKING,

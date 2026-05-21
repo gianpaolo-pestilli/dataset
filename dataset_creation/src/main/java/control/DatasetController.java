@@ -3,14 +3,12 @@ package control;
 import bean.MessageBean;
 import bean.ProjectInfoBean;
 import bean.ReleaseBean;
-import boundary.GitInteraction;
-import boundary.JiraInteraction;
+import boundary.api.GitInteraction;
+import boundary.api.JiraInteraction;
 import dao.DatasetDAO;
 import dao.ReleaseDAO;
 import exception.*;
 import settings.PropertiesSetter;
-
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,13 +27,17 @@ public class DatasetController extends AppController {
 
     @Override
     public void start() throws ControllerException {
-        String filename;
+        String dataFile;
         String projectName;
-        String projectKey;
+        String owner;
+        String repo;
+        String releaseFile;
         try {
-            filename = DatasetDAO.getFilename();
+            dataFile = DatasetDAO.getFilename();
             projectName = PropertiesSetter.getProjectName();
-            projectKey = PropertiesSetter.getSonarKey();
+            owner = PropertiesSetter.getOwner();
+            repo = PropertiesSetter.getRepo();
+            releaseFile = ReleaseDAO.getFilename();
 
         } catch (ConfigException e) {
             throw new ControllerException("Error while retrieving the file: " + e.getMessage());
@@ -49,14 +51,16 @@ public class DatasetController extends AppController {
 
         mess = new MessageBean("\nFiltering releases...");
         userBoundary.printMessage(mess);
-
-        mess = new MessageBean("Everything you will see will also be written into a file");
+        // Start from here !!
+        mess = new MessageBean("Considered releases will be written into this file: " + releaseFile);
         userBoundary.printMessage(mess);
 
         ProjectInfoBean param = new ProjectInfoBean(
-                projectKey,
+                null,
                 projectName,
-                null
+                null,
+                owner,
+                repo
         );
 
         List<ReleaseBean> fromGit;
@@ -74,14 +78,12 @@ public class DatasetController extends AppController {
 
         filterReleases(fromJira, fromGit);
 
-
         // Printing the user only the considered releases
         userBoundary.printReleases(releases);
     }
 
     @Override
     public void finish() throws ControllerException {
-
         // We write on a file the used releases to allow more repetitions of this experiment
         try {
             ReleaseDAO.writeReleases(releases);

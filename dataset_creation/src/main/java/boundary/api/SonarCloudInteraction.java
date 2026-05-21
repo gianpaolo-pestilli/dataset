@@ -1,4 +1,4 @@
-package boundary;
+package boundary.api;
 
 import bean.ClassesBean;
 import bean.ProjectInfoBean;

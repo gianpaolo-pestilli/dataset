@@ -1,4 +1,9 @@
 package settings;
+import boundary.UserInterface;
+import boundary.dataset.DatasetUserInterface;
+import boundary.ranking.DebtUserInterface;
+import boundary.ranking.EffortUserInterface;
+import boundary.ranking.SmellUserInterface;
 import control.*;
 import exception.ConfigException;
 
@@ -19,23 +24,23 @@ public class PropertiesSetter {
         }
     }
 
-    public static AppController getController() throws ConfigException{
+    public static UserInterface getUI() throws ConfigException{
         Properties prop = new Properties();
         try (InputStream input = new FileInputStream(fileName)) {
             prop.load(input);
-            String controlType = prop.getProperty("controller.type");
-            ControllerType controller = ControllerType.valueOf(controlType);
+            String Type = prop.getProperty("application.type");
+            ApplicationType app = ApplicationType.valueOf(Type);
 
-            switch (controller){
-                case DATASET -> {return new DatasetController();}
-                case SMELL_RANKING -> {return new SmellRankingController();}
-                case EFFORT_RANKING -> {return new EffortRankingController();}
-                case DEBT_RANKING -> {return new DebtRankingController();}
-                default -> throw new ConfigException("Invalid controller parameters");
+            switch (app){
+                case DATASET -> {return new DatasetUserInterface();}
+                case SMELL_RANKING -> {return new SmellUserInterface();}
+                case EFFORT_RANKING -> {return new EffortUserInterface();}
+                case DEBT_RANKING -> {return new DebtUserInterface();}
+                default -> throw new ConfigException("Invalid application parameters");
             }
 
         } catch (IOException e) {
-            throw new ConfigException("Failed to read controller.type from config.properties: " + e.getMessage());
+            throw new ConfigException("Failed to read application.type from config.properties: " + e.getMessage());
         }
     }
 
@@ -183,4 +188,26 @@ public class PropertiesSetter {
         }
     }
 
+    public static String getOwner() throws ConfigException{
+        Properties prop = new Properties();
+        try (InputStream input = new FileInputStream(fileName)) {
+                prop.load(input);
+                String owner = prop.getProperty("project.owner");
+                return owner;
+            } catch (IOException e) {
+                throw new ConfigException("Failed to read project.owner from config.properties: " + e.getMessage());
+            }
+        }
+
+    public static String getRepo() throws ConfigException{
+        Properties prop = new Properties();
+        try (InputStream input = new FileInputStream(fileName)) {
+            prop.load(input);
+            String repo = prop.getProperty("project.repo");
+            return repo;
+        } catch (IOException e) {
+            throw new ConfigException("Failed to read project.repo from config.properties: " + e.getMessage());
+        }
+    }
 }
+

@@ -1,12 +1,10 @@
-package boundary;
+package boundary.api;
 
 import bean.ProjectInfoBean;
 import bean.ReleaseBean;
-import exception.ConfigException;
 import exception.GitException;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import settings.PropertiesSetter;
 
 import java.io.IOException;
 import java.net.URI;
@@ -42,10 +40,11 @@ public class GitInteraction {
 
     // Returns all release versions from Git tags, avoiding the "syncope-" prefix to not create conflict
     public static List<ReleaseBean> getAllReleases(ProjectInfoBean info) throws GitException {
-        String key = info.getProjectKey();
-        String[] parts  = key.split("_", 2);
-        String repoOwner = parts[0];
-        String repoName  = "syncope";
+
+        String repoOwner = info.getProjectOwner();
+        String repoName  = info.getProjectRepo();
+        String projectName = info.getProjectName();
+        projectName = projectName.toLowerCase();
 
         List<ReleaseBean> releases = new ArrayList<>();
         int page = 1;
@@ -63,10 +62,10 @@ public class GitInteraction {
                 String tagName = tag.getString("name");
 
                 // Keep only tags that look like release tags (es. "syncope-3.0.0")
-                if (!tagName.startsWith("syncope-")) continue;
+                if (!tagName.startsWith(projectName+"-")) continue;
 
                 // Strip the prefix to get the version name (es. "3.0.0")
-                String version = tagName.replace("syncope-", "");
+                String version = tagName.replace(projectName+"-", "");
 
                 releases.add(new ReleaseBean(version));
             }
