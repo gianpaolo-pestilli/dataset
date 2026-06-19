@@ -10,6 +10,7 @@ import dao.ReleaseDAO;
 import exception.*;
 import settings.PropertiesSetter;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 /*
@@ -23,7 +24,10 @@ spotting the discrepancies between Jira and Git and eliminating branches differe
 public class DatasetController extends AppController {
 
     // The following list contains the beans of the FILTERED releases
-    private List<ReleaseBean> releases = new ArrayList<>();
+    private List<ReleaseBean> allReleases = new ArrayList<>();
+    private List<ReleaseBean> firstReleases = new ArrayList<>();
+    private AppController datasetBuilderController;
+
 
     @Override
     public void start() throws ControllerException {
@@ -32,12 +36,14 @@ public class DatasetController extends AppController {
         String owner;
         String repo;
         String releaseFile;
+        String firstReleaseFile;
         try {
             dataFile = DatasetDAO.getFilename();
             projectName = PropertiesSetter.getProjectName();
             owner = PropertiesSetter.getOwner();
             repo = PropertiesSetter.getRepo();
-            releaseFile = ReleaseDAO.getFilename();
+            releaseFile = ReleaseDAO.getAllReleasesFilename();
+            firstReleaseFile = ReleaseDAO.getFirstReleasesFilename();
 
         } catch (ConfigException e) {
             throw new ControllerException("Error while retrieving the file: " + e.getMessage());
@@ -79,37 +85,76 @@ public class DatasetController extends AppController {
         filterReleases(fromJira, fromGit);
 
         // Printing the user only the considered releases
-        userBoundary.printReleases(releases);
+        userBoundary.printReleases(allReleases);
+
+        // We have printed all the releases, filtered by GitHub and Jira
+        userBoundary.printMessage(new MessageBean("Start working on the first 33% of the releases..."));
+
+        int size = allReleases.size();
+        int firstThird = size / 3;
+
+        // Taking the first third...
+        for (int i = 0; i < firstThird; i++) {
+            firstReleases.add(allReleases.get(i));
+        }
+        mess = new MessageBean("Considered releases will be written into this file: " + firstReleaseFile);
+        userBoundary.printMessage(mess);
+
+        userBoundary.printMessage(new MessageBean("The following are the first 33%:"));
+        userBoundary.printReleases(firstReleases);
+
+        datasetBuilderController = new DatasetBuilderController(allReleases,firstReleases);
+        datasetBuilderController.setGraphicInterface(userBoundary);
+        buildDataset();
     }
 
     @Override
     public void finish() throws ControllerException {
         // We write on a file the used releases to allow more repetitions of this experiment
         try {
-            ReleaseDAO.writeReleases(releases);
+            ReleaseDAO.writeAllReleases(allReleases);
+            ReleaseDAO.writeFirstReleases(firstReleases);
+
         } catch (PersistenceException e) {
             throw new ControllerException(e.getMessage());
         }
     }
 
 
-    private void setReleases(List<ReleaseBean> list){
-        this.releases = list;
+    private void setAllReleases(List<ReleaseBean> list) {
+        this.allReleases = list;
     }
 
-    private void filterReleases(List<ReleaseBean> Jira, List<ReleaseBean> Git){
+    private void filterReleases(List<ReleaseBean> Jira, List<ReleaseBean> Git) {
         List<ReleaseBean> toSet = new ArrayList<>();
-
-        for(ReleaseBean jira : Jira){
-            for (ReleaseBean git : Git){
+        for (ReleaseBean jira : Jira) {
+            for (ReleaseBean git : Git) {
                 String jiraVersion = jira.getVersion();
                 String gitVersion = git.getVersion();
-                if(jiraVersion.equalsIgnoreCase(gitVersion)){
+                if (jiraVersion.equalsIgnoreCase(gitVersion)) {
                     toSet.add(jira);
                 }
             }
         }
+        toSet.sort(Comparator.comparing(ReleaseBean::getReleaseDate)
+                .thenComparing(ReleaseBean::getVersion));
 
-        setReleases(toSet);
+        // We want to get rid of releases such as -M or .M because they are not official, they are milestones
+        // Incubating releases are official releases, so I'm keeping them only if a git tag exists
+        List<ReleaseBean> filtered = new ArrayList<>();
+        for (ReleaseBean rel : toSet) {
+            if (!(rel.getVersion().contains("-M") || rel.getVersion().contains(".M"))) {
+                filtered.add(rel);
+            }
+        }
+        setAllReleases(filtered);
     }
+
+    private void buildDataset() throws ControllerException {
+        // The logic to build the dataset
+        datasetBuilderController.start();
+        datasetBuilderController.finish();
+    }
+
 }
+

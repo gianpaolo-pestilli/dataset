@@ -21,9 +21,7 @@ public class ReleaseBean {
         this.version = version;
     }
 
-    public String getVersion(){
-        return version;
-    }
+    public String getVersion(){return version;}
     public String getID(){
         return releaseID;
     }

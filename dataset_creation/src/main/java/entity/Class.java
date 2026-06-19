@@ -3,43 +3,69 @@ package entity;
 // This represents a single instance of the dataset
 public class Class {
 
-    public Class(String projectName){
-        this.projectName = projectName;
+    public Class(Release release, String name){
+        this.className = name;
+        this.release = release;
+        this.age = release.getAge();
     }
-
-
-    private String projectName;
 
     private String className;
 
-    private String releaseID;
-
-    // Class metrics
-    private int currentLOC;
+    private Release release;
 
 
-    private int currentLOCTouched;
 
-    //This is since the first release
-    private int allLOCTouched;
+    // Features
 
-    private int currentNumRevisions;
+    private long LOC;
+    private long LOCFromBegin;
 
-    // This is since the first release
-    private int allNumRevisions;
+    private long numRevisions;
+    private long numRevisionsFromBegin;
 
-    private int currentNumDefectFixed;
+    private long numFixes;
+    private long numFixesFromBegin;
 
-    // This is since the first release
-    private int allNumDefectFixed;
+    private long numAuthors;
+    private long numAuthorsFromBegin;
 
-    private int currentNumAuth;
+    private long churn;
+    private long churnFromBegin;
 
-    private int allNumAuth;
+    private long maxLOCAdded; //The highest in this release
+    private long maxLOCAddedFromBegin; //The highest in the whole project until this release (included)
 
+    private double avgLOCAdded; //The average number of LOC added per commit in this release
+    private double avgLOCAddedFromBegin; //The average number of LOC added per commit from the beginning of the project
 
-    private int numSmells;
-    // To label
+    private double avgChangeSet;
+    private double avgChangeSetFromBegin;
+
+    private long age; //Of the release
+    private double weightedAge; //By LOC
+
+    // My metrics
+    private int numOps;
+    private double avgTimeBetweenCommits; // In seconds
+
+    private long numSmells;
+
     private boolean isBuggy;
+
+    public String getProjectName(){
+        return this.release.getProjectName();
+    }
+
+    public String getName(){
+        return className;
+    }
+
+    public String getReleaseID(){
+        return this.release.getID();
+    }
+
+    public double setWeightedAge(){
+        return (age / churn);
+    }
 
 }
