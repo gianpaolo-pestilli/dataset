@@ -10,7 +10,8 @@ public class ReleaseBean {
 
     public ReleaseBean(String version){
         this.version = version;
-    }
+    } // Git tag without project name
+
     public ReleaseBean(String projectName,
                        LocalDate releaseDate,
                        String releaseID,

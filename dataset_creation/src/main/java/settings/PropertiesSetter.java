@@ -1,5 +1,6 @@
 package settings;
 import boundary.UserInterface;
+import boundary.dataset.DatasetPopulationInterface;
 import boundary.dataset.DatasetUserInterface;
 import boundary.ranking.DebtUserInterface;
 import boundary.ranking.EffortUserInterface;
@@ -13,6 +14,8 @@ import java.util.Properties;
 public class PropertiesSetter {
 
     private static String fileName = "config.properties";
+    private static String secretFile = "secrets.properties";
+
 
     public static String getProjectName() throws ConfigException {
         Properties prop = new Properties();
@@ -32,7 +35,8 @@ public class PropertiesSetter {
             ApplicationType app = ApplicationType.valueOf(Type);
 
             switch (app){
-                case DATASET -> {return new DatasetUserInterface();}
+                case DATASET_INIT -> {return new DatasetUserInterface();}
+                case DATASET_POPULATION -> {return new DatasetPopulationInterface();}
                 case SMELL_RANKING -> {return new SmellUserInterface();}
                 case EFFORT_RANKING -> {return new EffortUserInterface();}
                 case DEBT_RANKING -> {return new DebtUserInterface();}
@@ -190,23 +194,46 @@ public class PropertiesSetter {
 
     public static String getOwner() throws ConfigException{
         Properties prop = new Properties();
-        try (InputStream input = new FileInputStream(fileName)) {
+        try (InputStream input = new FileInputStream(secretFile)) {
                 prop.load(input);
                 String owner = prop.getProperty("project.owner");
                 return owner;
             } catch (IOException e) {
-                throw new ConfigException("Failed to read project.owner from config.properties: " + e.getMessage());
+                throw new ConfigException("Failed to read project.owner from secret file: " + e.getMessage());
             }
         }
 
     public static String getRepo() throws ConfigException{
         Properties prop = new Properties();
-        try (InputStream input = new FileInputStream(fileName)) {
+        try (InputStream input = new FileInputStream(secretFile)) {
             prop.load(input);
             String repo = prop.getProperty("project.repo");
             return repo;
         } catch (IOException e) {
-            throw new ConfigException("Failed to read project.repo from config.properties: " + e.getMessage());
+            throw new ConfigException("Failed to read project.repo from secret file: " + e.getMessage());
+        }
+    }
+
+
+    public static String getSonarToken() throws ConfigException{
+        Properties prop = new Properties();
+        try (InputStream input = new FileInputStream(secretFile)) {
+            prop.load(input);
+            String token = prop.getProperty("token");
+            return token;
+        } catch (IOException e) {
+            throw new ConfigException("Failed to read secret file: " + e.getMessage());
+        }
+    }
+
+    public static String getProjectLocalPath() throws ConfigException{
+        Properties prop = new Properties();
+        try (InputStream input = new FileInputStream(secretFile)) {
+            prop.load(input);
+            String path = prop.getProperty("path");
+            return path;
+        } catch (IOException e) {
+            throw new ConfigException("Failed to read secret file: " + e.getMessage());
         }
     }
 }

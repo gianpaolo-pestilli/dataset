@@ -13,6 +13,8 @@ public class Release {
         private String releaseID;
         private String version;
 
+        private int progressiveNumber; // Useful for Proportion
+
         private long age;
         private List<Class> classes = new ArrayList<>();
 
@@ -55,6 +57,11 @@ public class Release {
             return classes;
         }
 
+        public void setProgressiveNumber(int x){
+            progressiveNumber = x;
+        }
+
+        public int getProgressiveNumber(){return progressiveNumber;}
 
     }
 

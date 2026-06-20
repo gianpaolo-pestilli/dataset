@@ -1,7 +1,8 @@
 package settings;
 
 public enum ApplicationType {
-    DATASET,
+    DATASET_INIT,
+    DATASET_POPULATION,
     EFFORT_RANKING,
     SMELL_RANKING,
     DEBT_RANKING

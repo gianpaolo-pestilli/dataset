@@ -1,14 +1,19 @@
 package boundary.api;
 
 import bean.ClassesBean;
+import bean.MessageBean;
 import bean.ProjectInfoBean;
+import control.AppController;
 import exception.ConfigException;
 import exception.SonarException;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import settings.PropertiesSetter;
 
+import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -21,6 +26,7 @@ public class SonarCloudInteraction {
     private static final String SONAR_API_BASE = "https://sonarcloud.io/api/measures/component_tree";
     private static final String METRIC_SMELLS  = "code_smells";
     private static final String METRIC_EFFORT  = "sqale_index";
+    private static final String METRIC_METHODS  = "functions";
     private static final String METRIC_TECHNICAL_DEBT_RATIO = "sqale_debt_ratio";
     private static final int    PAGE_SIZE      = 500;
 
@@ -131,6 +137,7 @@ public class SonarCloudInteraction {
             // Extract Technical debt ratio as an integer (multiplied by 100 for precision)
             double technicalDebtRatio = extractDecimalMetricValue(component, METRIC_TECHNICAL_DEBT_RATIO);
 
+            // Just for aesthetics I left the cleaned version number (syncope-5.0.0-snapshot is simply written as 5.0.0)
             ClassesBean c = new ClassesBean(projectName, path, releaseVersion,
                     extractMetricValue(component, METRIC_SMELLS),
                     extractMetricValue(component, METRIC_EFFORT),
@@ -169,5 +176,107 @@ public class SonarCloudInteraction {
         }
 
         return version.replace("-SNAPSHOT", "").trim();
+    }
+
+
+
+    public static List<ClassesBean> getClassesFromCurrentRelease(ProjectInfoBean info) throws SonarException {
+
+        String projectKey = info.getProjectKey();
+
+        List<ClassesBean> result = new ArrayList<>();
+
+        List<JSONObject> components = fetchAllComponents(projectKey, METRIC_SMELLS + "," + METRIC_METHODS);
+
+        for (JSONObject component : components) {
+            String path = component.optString("path", "");
+            if (isTestClass(path)) continue;
+
+            // Just for aesthetics I left the cleaned version number (syncope-5.0.0-snapshot is simply written as 5.0.0)
+            int numSmells = extractMetricValue(component,METRIC_SMELLS);
+            int numOps = extractMetricValue(component,METRIC_METHODS);
+
+            ClassesBean c = new ClassesBean(path,
+                    extractMetricValue(component, METRIC_SMELLS),
+                    extractMetricValue(component, METRIC_METHODS)
+            );
+            result.add(c);
+        }
+
+
+        return result;
+    }
+
+    public static void runScan(ProjectInfoBean info, AppController controller) throws SonarException {
+        ProcessBuilder pb = getProcessBuilder(info);
+        try{
+        Process process = pb.start();
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    controller.notifyController(new MessageBean(line));
+                }
+            }
+            int exitCode = process.waitFor();
+            if (exitCode != 0) {
+                throw new SonarException("Scanning error, code = " + exitCode);
+            }
+
+        } catch (IOException | InterruptedException e) {
+            throw new SonarException("Error while scanning: " + e.getMessage());
+        }
+    }
+
+    private static ProcessBuilder getProcessBuilder(ProjectInfoBean info) {
+        List<String> command = new ArrayList<>();
+        String instruction = "C:\\Users\\tpest\\Downloads\\sonar-scanner-cli-8.0.1.6346-windows-x64\\sonar-scanner-8.0.1.6346-windows-x64\\bin\\sonar-scanner.bat";
+        String projectKey = info.getProjectKey();
+        String token = info.getToken();
+        String tag = info.getReleaseVersion();
+        String organization = info.getProjectOwner();
+        String path = info.getLocalPath();
+        command.add(instruction);
+        command.add("-Dsonar.projectKey=" +projectKey);
+        command.add("-Dsonar.token=" + token);
+        command.add("-Dsonar.projectVersion=" + tag);
+        command.add("-Dsonar.host.url=https://sonarcloud.io");
+        command.add("-Dsonar.organization=" + organization);
+        command.add("-Dsonar.sources=" + path);
+        command.add("-Dsonar.java.binaries=" + path);
+        command.add("-Dsonar.scanner.skipJreProvisioning=true");
+        command.add("-Dsonar.scanner.javaExecutable=" + System.getProperty("java.home") + "\\bin\\java.exe");
+
+        ProcessBuilder pb = new ProcessBuilder(command);
+        pb.directory(new File(path));
+        pb.redirectErrorStream(true);
+        return pb;
+    }
+
+
+    public static void waitForAnalysisCompletion(ProjectInfoBean info, AppController controller) throws SonarException {
+        String projectKey = info.getProjectKey();
+        boolean completed = false;
+        while (!completed) {
+            try {
+                String url = "https://sonarcloud.io/api/ce/component?component=" + projectKey;
+                String response = fetchJson(url);
+                JSONObject root = new JSONObject(response);
+                if (!root.has("current")) {
+                    throw new SonarException("No analysis for this project: " + projectKey);
+                }
+                String status = root.getJSONObject("current").getString("status");
+                if ("SUCCESS".equals(status)) {
+                    completed = true;
+                } else if ("FAILED".equals(status) || "CANCELED".equals(status)) {
+                    throw new SonarException("Failed Analysis, STATUS: " + status);
+                } else {
+                    controller.notifyController(new MessageBean("Analysis in progress..."));
+                    Thread.sleep(5000);
+                }
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                throw new SonarException("Thread interrupted while waiting");
+            }
+        }
     }
 }

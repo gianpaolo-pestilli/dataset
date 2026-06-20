@@ -48,7 +48,7 @@ public abstract class RankingController extends AppController {
             ProjectInfoBean param = new ProjectInfoBean(
                     projectKey,
                     projectName,
-                    currentVersion,
+                    currentVersion, //Git tag without project name
                     null,
                     null
             );

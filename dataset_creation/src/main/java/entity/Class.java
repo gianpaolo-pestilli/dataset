@@ -68,4 +68,22 @@ public class Class {
         return (age / churn);
     }
 
+    public void setNumSmells(long num){
+        this.numSmells = num;
+    }
+
+    public void setNumOps(int num){
+        this.numOps = num;
+    }
+
+    public int getNumber(){
+        return this.release.getProgressiveNumber();
+    }
+
+    public int getNumOps() {
+        return numOps;
+    }
+    public int getNumSmells(){
+        return Math.toIntExact(numSmells);
+    }
 }

@@ -6,7 +6,10 @@ import exception.GitException;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -74,5 +77,42 @@ public class GitInteraction {
         }
 
         return releases;
+    }
+
+
+
+    public static void doCheckout(ProjectInfoBean info) throws GitException {
+        String repoPath = info.getLocalPath();
+        String tagName = info.getTag();
+
+        List<List<String>> commands = new ArrayList<>();
+        commands.add(List.of("git", "reset", "--hard", "HEAD"));
+        commands.add(List.of("git", "clean", "-fd"));
+        commands.add(List.of("git", "checkout", "master"));
+        commands.add(List.of("git", "checkout", tagName));
+
+        try {
+            for (List<String> cmd : commands) {
+                ProcessBuilder pb = new ProcessBuilder(cmd);
+                pb.directory(new File(repoPath));
+                pb.redirectErrorStream(true);
+
+                Process process = pb.start();
+
+                   try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
+                    String line;
+                    while ((line = reader.readLine()) != null) {
+                         System.out.println("GIT: " + line);
+                    }
+                }
+
+                int exitCode = process.waitFor();
+                if (exitCode != 0) {
+                    throw new GitException("Checkout failed on command: " + cmd + " error: " + exitCode);
+                }
+            }
+        } catch (IOException | InterruptedException e) {
+            throw new GitException("Error during checkout: " + e.getMessage());
+        }
     }
 }

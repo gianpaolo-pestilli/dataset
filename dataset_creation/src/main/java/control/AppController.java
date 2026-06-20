@@ -1,5 +1,6 @@
 package control;
 
+import bean.MessageBean;
 import boundary.UserInterface;
 import exception.ControllerException;
 
@@ -12,6 +13,10 @@ public abstract class AppController {
 
     public void setGraphicInterface(UserInterface ui){
         this.userBoundary = ui;
+    }
+
+    public void notifyController(MessageBean message){
+        userBoundary.printMessage(message);
     }
 
     public abstract void start() throws ControllerException;

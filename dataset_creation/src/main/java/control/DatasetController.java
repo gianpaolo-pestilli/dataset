@@ -31,14 +31,12 @@ public class DatasetController extends AppController {
 
     @Override
     public void start() throws ControllerException {
-        String dataFile;
         String projectName;
         String owner;
         String repo;
         String releaseFile;
         String firstReleaseFile;
         try {
-            dataFile = DatasetDAO.getFilename();
             projectName = PropertiesSetter.getProjectName();
             owner = PropertiesSetter.getOwner();
             repo = PropertiesSetter.getRepo();
@@ -103,7 +101,7 @@ public class DatasetController extends AppController {
         userBoundary.printMessage(new MessageBean("The following are the first 33%:"));
         userBoundary.printReleases(firstReleases);
 
-        datasetBuilderController = new DatasetBuilderController(allReleases,firstReleases);
+        datasetBuilderController = new DatasetBuilderController(firstReleases);
         datasetBuilderController.setGraphicInterface(userBoundary);
         buildDataset();
     }
