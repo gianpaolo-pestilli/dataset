@@ -1,14 +1,17 @@
 package dao;
 import bean.ClassesBean;
 import exception.ConfigException;
-import exception.ControllerException;
+import entity.Class;
 import exception.PersistenceException;
 import settings.PropertiesSetter;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 
 public class SmellClassesDAO extends ClassesDAO {
@@ -16,12 +19,7 @@ public class SmellClassesDAO extends ClassesDAO {
     @Override
     public void saveRanking(List<ClassesBean> classList) throws PersistenceException {
 
-        String filename;
-        try {
-            filename = PropertiesSetter.getSmellRankingFile();
-        } catch (ConfigException e) {
-            throw new PersistenceException(e.getMessage());
-        }
+        String filename = getOutputFile();
 
         try (FileWriter writer = new FileWriter(filename)) {
             // Current date
@@ -54,5 +52,37 @@ public class SmellClassesDAO extends ClassesDAO {
         } catch (ConfigException e) {
             throw new PersistenceException(e.getMessage());
         }
+    }
+
+    public List<Class> getAllClasses() throws PersistenceException {
+        String filename = getOutputFile();
+        // We want to read only the first smell file
+        filename = filename.replaceAll("_\\d+\\.csv$", "_0.csv");
+
+        List<Class> classes = new ArrayList<>();
+        try (BufferedReader reader = new BufferedReader(new FileReader(filename))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                if (!line.trim().isEmpty()) {
+                    String[] parts = line.split(",");
+
+                    if (parts.length >= 5) {
+                        String className = parts[2].trim();
+
+                        try {
+                            int numSmell = Integer.parseInt(parts[4].trim());
+                            Class c = new Class(className, numSmell);
+                            classes.add(c);
+                        } catch (NumberFormatException ex) {
+                            // Ignore
+                        }
+                    }
+                }
+            }
+        } catch (IOException e) {
+            throw new PersistenceException("Can't read smells file: " + e.getMessage());
+        }
+
+        return classes;
     }
 }

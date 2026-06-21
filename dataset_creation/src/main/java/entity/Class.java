@@ -3,6 +3,11 @@ package entity;
 // This represents a single instance of the dataset
 public class Class {
 
+    public Class(String name, int numSmells){
+        this.className = name;
+        this.numSmells = numSmells;
+    }
+
     public Class(Release release, String name){
         this.className = name;
         this.release = release;

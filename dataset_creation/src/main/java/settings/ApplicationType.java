@@ -5,5 +5,6 @@ public enum ApplicationType {
     DATASET_POPULATION,
     EFFORT_RANKING,
     SMELL_RANKING,
-    DEBT_RANKING
+    DEBT_RANKING,
+    APPLICATIVE_RANKING
 }

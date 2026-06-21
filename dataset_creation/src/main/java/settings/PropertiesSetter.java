@@ -2,6 +2,7 @@ package settings;
 import boundary.UserInterface;
 import boundary.dataset.DatasetPopulationInterface;
 import boundary.dataset.DatasetUserInterface;
+import boundary.ranking.ApplicativeRankingUserInterface;
 import boundary.ranking.DebtUserInterface;
 import boundary.ranking.EffortUserInterface;
 import boundary.ranking.SmellUserInterface;
@@ -40,6 +41,7 @@ public class PropertiesSetter {
                 case SMELL_RANKING -> {return new SmellUserInterface();}
                 case EFFORT_RANKING -> {return new EffortUserInterface();}
                 case DEBT_RANKING -> {return new DebtUserInterface();}
+                case APPLICATIVE_RANKING -> {return new ApplicativeRankingUserInterface();}
                 default -> throw new ConfigException("Invalid application parameters");
             }
 
@@ -234,6 +236,16 @@ public class PropertiesSetter {
             return path;
         } catch (IOException e) {
             throw new ConfigException("Failed to read secret file: " + e.getMessage());
+        }
+    }
+
+    public static String getApplicativeFile() throws ConfigException{
+        Properties prop = new Properties();
+        try (InputStream input = new FileInputStream(fileName)) {
+            prop.load(input);
+            return prop.getProperty("applicative-ranking.file");
+        } catch (IOException e) {
+            throw new ConfigException("Failed to read applicative-ranking.file from config.properties: " + e.getMessage());
         }
     }
 }

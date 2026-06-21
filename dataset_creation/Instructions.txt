@@ -7,6 +7,7 @@ application.type=SMELL_RANKING
         EFFORT_RANKING,
         SMELL_RANKING
         DEBT_RANKING
+        APPLICATIVE_RANKING
 
 effort-ranking.count=0
     To avoid overriding previous files with new releases
