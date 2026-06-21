@@ -1,12 +1,12 @@
 package dao;
 
+import dao.dto.ClassDTO;
 import entity.Release;
 import entity.Class;
 import exception.PersistenceException;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.PrintWriter;
+
+import java.io.*;
+import java.util.ArrayList;
 import java.util.List;
 
 public class DatasetDAO {
@@ -89,6 +89,35 @@ public class DatasetDAO {
         } catch (IOException e) {
             throw new PersistenceException("Error while writing release to dataset file: " + e.getMessage());
         }
+    }
+
+    public static List<ClassDTO> getSonarClasses() throws PersistenceException {
+        List<ClassDTO> toReturn = new ArrayList<>();
+        String filename = sonarDataset;
+        String line;
+        String csvSplitBy = ",";
+
+        try (BufferedReader br = new BufferedReader(new FileReader(filename))) {
+        br.readLine();
+        while ((line = br.readLine()) != null) {
+            String[] data = line.split(csvSplitBy);
+            if (data.length >= 5) {
+                ClassDTO extracted = extractClass(data);
+                toReturn.add(extracted);
+            }
+        }
+    } catch (IOException e) {
+        throw new PersistenceException("Error occurred while reading file: " + filename +"\n"+e.getMessage());
+    }
+        return toReturn;
+}
+
+private static ClassDTO extractClass(String[] data) {
+    String pathName = data[1].trim();
+    int progressiveNumber = Integer.parseInt(data[2].trim());
+    int numOps = Integer.parseInt(data[3].trim());
+    int numSmell = Integer.parseInt(data[4].trim());
+    return new ClassDTO(pathName, progressiveNumber, numSmell, numOps);
     }
 }
 

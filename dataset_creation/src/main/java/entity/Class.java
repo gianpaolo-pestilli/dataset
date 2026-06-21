@@ -14,11 +14,16 @@ public class Class {
         this.age = release.getAge();
     }
 
+    public Class(Release release, String name, int numSmells, int numOps){
+        this.className = name;
+        this.release = release;
+        this.numSmells = numSmells;
+        this.numOps = numOps;
+    }
+
     private String className;
 
     private Release release;
-
-
 
     // Features
 

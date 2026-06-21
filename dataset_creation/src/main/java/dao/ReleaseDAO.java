@@ -1,10 +1,15 @@
 package dao;
 
 import bean.ReleaseBean;
+import entity.Release;
 import exception.PersistenceException;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 public class ReleaseDAO {
@@ -65,6 +70,40 @@ public class ReleaseDAO {
         } catch (IOException e) {
             throw new PersistenceException("Error while writing releases to file: " + e.getMessage());
         }
+    }
+
+    public static List<Release> getAllReleases() throws PersistenceException {
+        // Return the first 33% of the releases (from first_releases.csv)
+        List<Release> releases = new ArrayList<>();
+        String csvFile = firstReleasesFilename;
+        String line;
+        String csvSplitBy = ",";
+
+        try (BufferedReader br = new BufferedReader(new FileReader(csvFile))) {
+            br.readLine();
+            while ((line = br.readLine()) != null) {
+               String[] data = line.split(csvSplitBy);
+                if (data.length >= 5) {
+                    Release release = getRelease(data);
+                    releases.add(release);
+                }
+            }
+        } catch (IOException e) {
+            throw new PersistenceException("Error occurred while reading file: " + csvFile +"\n"+e.getMessage());
+        }
+        return releases;
+    }
+
+    private static Release getRelease(String[] data) {
+        int progressiveNumber = Integer.parseInt(data[0].trim());
+        String projectName = data[1].trim();
+        String tag = data[2].trim();
+        String JiraID = data[3].trim();
+        String releaseDateStr = data[4].trim();
+        LocalDate releaseDate = LocalDate.parse(releaseDateStr);
+        Release release = new Release(projectName,releaseDate,JiraID,tag);
+        release.setProgressiveNumber(progressiveNumber);
+        return release;
     }
 
 }

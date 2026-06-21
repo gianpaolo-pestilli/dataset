@@ -229,7 +229,7 @@ public class SonarCloudInteraction {
 
     private static ProcessBuilder getProcessBuilder(ProjectInfoBean info) {
         List<String> command = new ArrayList<>();
-        String instruction = "C:\\Users\\tpest\\Downloads\\sonar-scanner-cli-8.0.1.6346-windows-x64\\sonar-scanner-8.0.1.6346-windows-x64\\bin\\sonar-scanner.bat";
+        String instruction = info.getSonarPath();
         String projectKey = info.getProjectKey();
         String token = info.getToken();
         String tag = info.getReleaseVersion();

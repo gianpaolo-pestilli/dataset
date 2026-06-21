@@ -10,6 +10,8 @@ public class ProjectInfoBean {
     private String localPath;
     private String token;
 
+    private String sonarPath;
+
     public ProjectInfoBean(){}
 
     public ProjectInfoBean(String projectKey,
@@ -66,6 +68,14 @@ public class ProjectInfoBean {
 
     public String getToken(){
         return token;
+    }
+
+    public void setSonar(String path){
+        this.sonarPath = path;
+    }
+
+    public String getSonarPath(){
+        return sonarPath;
     }
 
 }

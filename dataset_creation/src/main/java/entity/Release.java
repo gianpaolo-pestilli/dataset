@@ -45,6 +45,11 @@ public class Release {
             classes.add(newClass);
         }
 
+        public void addClass(String classname,int numSmell,int numOps){
+            Class newClass = new Class(this, classname,numSmell,numOps);
+            classes.add(newClass);
+        }
+
         public void setAge(long age){
             this.age = age;
         }

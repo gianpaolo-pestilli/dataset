@@ -248,5 +248,16 @@ public class PropertiesSetter {
             throw new ConfigException("Failed to read applicative-ranking.file from config.properties: " + e.getMessage());
         }
     }
+
+    public static String getSonarPath() throws ConfigException {
+        Properties prop = new Properties();
+        try (InputStream input = new FileInputStream(secretFile)) {
+            prop.load(input);
+            return prop.getProperty("sonar.path");
+        } catch (IOException e) {
+            throw new ConfigException("Failed to read project.name from secret file: " + e.getMessage());
+        }
+    }
+
 }
 

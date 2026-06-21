@@ -36,12 +36,14 @@ public class DatasetBuilderController extends AppController{
         String projectOwner;
         String path;
         String token;
+        String sonar;
         try {
             projectName = PropertiesSetter.getProjectName();
             projectKey = PropertiesSetter.getSonarKey();
             projectOwner = PropertiesSetter.getOwner();
             path = PropertiesSetter.getProjectLocalPath();
             token = PropertiesSetter.getSonarToken();
+            sonar = PropertiesSetter.getSonarPath();
 
         } catch (ConfigException e) {
             throw new ControllerException(e.getMessage());
@@ -50,6 +52,7 @@ public class DatasetBuilderController extends AppController{
         ProjectInfoBean info = new ProjectInfoBean(projectKey, projectName, null, projectOwner, null);
         info.setToken(token);
         info.setLocalPath(path);
+        info.setSonar(sonar);
         try {
 
             for (Release rel : firstReleases) {

@@ -3,6 +3,7 @@ package boundary.api;
 import bean.ProjectInfoBean;
 import bean.ReleaseBean;
 import exception.GitException;
+import org.eclipse.jgit.api.Git;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -16,9 +17,11 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 
 public class GitInteraction {
 
+    private static Git git;
     private static final String GITHUB_API_BASE = "https://api.github.com/repos/";
     private static final int    PAGE_SIZE       = 100;
 
@@ -98,14 +101,6 @@ public class GitInteraction {
                 pb.redirectErrorStream(true);
 
                 Process process = pb.start();
-
-                   try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
-                    String line;
-                    while ((line = reader.readLine()) != null) {
-                         System.out.println("GIT: " + line);
-                    }
-                }
-
                 int exitCode = process.waitFor();
                 if (exitCode != 0) {
                     throw new GitException("Checkout failed on command: " + cmd + " error: " + exitCode);
@@ -113,6 +108,30 @@ public class GitInteraction {
             }
         } catch (IOException | InterruptedException e) {
             throw new GitException("Error during checkout: " + e.getMessage());
+        }
+    }
+
+    private static void open(ProjectInfoBean info) throws GitException {
+        String repoPath = info.getLocalPath();
+        repoPath = repoPath + "/.git";
+        if(git == null){
+            File repoDir = new File(repoPath);
+            try{git = Git.open(repoDir);} catch (IOException e) {
+                throw new GitException(e.getMessage());
+            }
+        }
+    }
+
+    public static Git getGit(ProjectInfoBean info) throws GitException{
+        if(git == null){
+            open(info);
+        }
+        return git;
+    }
+
+    public static void close(){
+        if(git != null){
+            git.close();
         }
     }
 }
