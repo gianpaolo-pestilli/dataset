@@ -13,9 +13,15 @@ public class Release {
         private String releaseID;
         private String version;
 
+        private LocalDate firstCommitDate;
+        private LocalDate lastCommitDate;
+
         private int progressiveNumber; // Useful for Proportion
 
+
         private long age;
+        private long ageInDays;
+
         private List<Class> classes = new ArrayList<>();
 
         public Release(String projectName,
@@ -45,8 +51,8 @@ public class Release {
             classes.add(newClass);
         }
 
-        public void addClass(String classname,int numSmell,int numOps){
-            Class newClass = new Class(this, classname,numSmell,numOps);
+        public void addClass(String classname,int numSmell,int numOps, int LOC){
+            Class newClass = new Class(this, classname,numSmell,numOps,LOC);
             classes.add(newClass);
         }
 
@@ -67,6 +73,30 @@ public class Release {
         }
 
         public int getProgressiveNumber(){return progressiveNumber;}
+
+        public void setLastCommitDate(LocalDate lastCommitDate){
+            this.lastCommitDate = lastCommitDate;
+        }
+
+        public void setFirstCommitDate(LocalDate firstCommitDate){
+            this.firstCommitDate = firstCommitDate;
+        }
+
+        public LocalDate getFirstCommitDate(){
+            return firstCommitDate;
+        }
+
+        public LocalDate getLastCommitDate(){
+            return lastCommitDate;
+        }
+
+        public void setAgeInDays(long ageInDays){
+            this.ageInDays = ageInDays;
+        }
+
+        public long getAgeInDays(){
+            return ageInDays;
+        }
 
     }
 

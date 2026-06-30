@@ -69,6 +69,7 @@ public class DatasetBuilderController extends AppController{
                     Class interest = realClasses.get(i);
                     interest.setNumSmells(classes.get(i).getNumSmell());
                     interest.setNumOps(classes.get(i).getNumOps());
+                    interest.setLOC(classes.get(i).getLoc());
                 }
             writeRelease(rel);
 

@@ -8,15 +8,18 @@ public class ClassesBean {
     private Integer numSmell;
     private Integer timeSmell; // in minutes
     private Double debt; // timeSmell scaled by the size (SonarCloud definition)
+    private Integer loc;
 
     private Integer numOps; // number of operations in the class
 
     public ClassesBean(String className,
                        Integer numSmell,
-                       Integer numMethods){
+                       Integer numMethods,
+                       Integer linesOfCode){
         this.className = className;
         this.numSmell = numSmell;
         this.numOps = numMethods;
+        this.loc = linesOfCode;
     }
 
     public ClassesBean(String projectName,
@@ -85,4 +88,6 @@ public class ClassesBean {
     public Integer getNumOps(){
         return numOps;
     }
+
+    public Integer getLoc(){return loc;}
 }

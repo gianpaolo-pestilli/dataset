@@ -28,6 +28,7 @@ public class SonarCloudInteraction {
     private static final String METRIC_EFFORT  = "sqale_index";
     private static final String METRIC_METHODS  = "functions";
     private static final String METRIC_TECHNICAL_DEBT_RATIO = "sqale_debt_ratio";
+    private static final String METRIC_LOC = "lines";
     private static final int    PAGE_SIZE      = 500;
 
 
@@ -186,7 +187,7 @@ public class SonarCloudInteraction {
 
         List<ClassesBean> result = new ArrayList<>();
 
-        List<JSONObject> components = fetchAllComponents(projectKey, METRIC_SMELLS + "," + METRIC_METHODS);
+        List<JSONObject> components = fetchAllComponents(projectKey, METRIC_SMELLS + "," + METRIC_METHODS+ "," + METRIC_LOC);
 
         for (JSONObject component : components) {
             String path = component.optString("path", "");
@@ -195,10 +196,12 @@ public class SonarCloudInteraction {
             // Just for aesthetics I left the cleaned version number (syncope-5.0.0-snapshot is simply written as 5.0.0)
             int numSmells = extractMetricValue(component,METRIC_SMELLS);
             int numOps = extractMetricValue(component,METRIC_METHODS);
+            int loc = extractMetricValue(component,METRIC_LOC);
 
             ClassesBean c = new ClassesBean(path,
-                    extractMetricValue(component, METRIC_SMELLS),
-                    extractMetricValue(component, METRIC_METHODS)
+                    numSmells,
+                    numOps,
+                    loc
             );
             result.add(c);
         }
@@ -245,6 +248,9 @@ public class SonarCloudInteraction {
         command.add("-Dsonar.java.binaries=" + path);
         command.add("-Dsonar.scanner.skipJreProvisioning=true");
         command.add("-Dsonar.scanner.javaExecutable=" + System.getProperty("java.home") + "\\bin\\java.exe");
+        command.add("-Dsonar.inclusions=**/*.java");
+        command.add("-Dsonar.exclusions=**/target/**,**/test/**");
+
 
         ProcessBuilder pb = new ProcessBuilder(command);
         pb.directory(new File(path));

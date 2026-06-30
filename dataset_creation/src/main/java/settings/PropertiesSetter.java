@@ -2,6 +2,7 @@ package settings;
 import boundary.UserInterface;
 import boundary.dataset.DatasetPopulationInterface;
 import boundary.dataset.DatasetUserInterface;
+import boundary.dataset.LabelingUserInterface;
 import boundary.ranking.ApplicativeRankingUserInterface;
 import boundary.ranking.DebtUserInterface;
 import boundary.ranking.EffortUserInterface;
@@ -42,6 +43,7 @@ public class PropertiesSetter {
                 case EFFORT_RANKING -> {return new EffortUserInterface();}
                 case DEBT_RANKING -> {return new DebtUserInterface();}
                 case APPLICATIVE_RANKING -> {return new ApplicativeRankingUserInterface();}
+                case DATASET_LABELING -> {return new LabelingUserInterface();}
                 default -> throw new ConfigException("Invalid application parameters");
             }
 

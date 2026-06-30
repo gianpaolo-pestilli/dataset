@@ -5,16 +5,19 @@ public class ClassDTO {
     private int numSmells;
     private int numMethods;
     private String path;
+    private int loc;
 
     public ClassDTO(String name,
                     int releaseNumber,
                     int numSmells,
-                    int numOps)
+                    int numOps,
+                    int loc)
     {
         this.path = name;
         this.releaseNumber = releaseNumber;
         this.numSmells = numSmells;
         this.numMethods = numOps;
+        this.loc = loc;
     }
 
     public int getReleaseNumber(){
@@ -32,4 +35,6 @@ public class ClassDTO {
     public int getNumMethods() {
         return numMethods;
     }
+
+    public int getLoc(){return loc;}
 }

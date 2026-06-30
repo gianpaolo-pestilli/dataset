@@ -1,5 +1,10 @@
 package entity;
 
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
+import java.util.HashSet;
+import java.util.Set;
+
 // This represents a single instance of the dataset
 public class Class {
 
@@ -11,24 +16,21 @@ public class Class {
     public Class(Release release, String name){
         this.className = name;
         this.release = release;
-        this.age = release.getAge();
     }
 
-    public Class(Release release, String name, int numSmells, int numOps){
+    public Class(Release release, String name, int numSmells, int numOps, int LOC){
         this.className = name;
         this.release = release;
         this.numSmells = numSmells;
         this.numOps = numOps;
+        this.LOC = LOC;
     }
 
     private String className;
-
     private Release release;
 
-    // Features
-
+    // --- Features Esistenti ---
     private long LOC;
-    private long LOCFromBegin;
 
     private long numRevisions;
     private long numRevisionsFromBegin;
@@ -51,16 +53,98 @@ public class Class {
     private double avgChangeSet;
     private double avgChangeSetFromBegin;
 
+    private double maxChangeSet;
+    private double maxChangeSetFromBegin;
+
     private long age; //Of the release
     private double weightedAge; //By LOC
 
     // My metrics
     private int numOps;
-    private double avgTimeBetweenCommits; // In seconds
+    private double avgTimeBetweenCommits; // Utilizzato per la Metrica 20 (Frequenza)
 
     private long numSmells;
-
     private boolean isBuggy;
+
+    // --- Variabili di supporto (invisibili all'esterno, servono solo per i calcoli interni) ---
+    private Set<String> authorsInRelease = new HashSet<>();
+    private long totalLocAddedInRelease = 0;
+    private long totalLocAddedFromBegin = 0;
+    private long totalLocDeletedFromBegin = 0;
+    private long totalChangeSetInRelease = 0;
+    private long totalChangeSetFromBegin = 0;
+    private LocalDate firstTouchedInRelease = null;
+    private LocalDate lastTouchedInRelease = null;
+    private double weightedAgeNumerator = 0.0;
+
+    // ========================================================================
+    // METODI DI ELABORAZIONE E POPOLAMENTO DATI (Chiamati dal Controller)
+    // ========================================================================
+
+    public void updateFromTracker(ClassTracker tracker) {
+        this.numRevisionsFromBegin = tracker.getNumRev();
+        this.numFixesFromBegin = tracker.getNumFix();
+        this.numAuthorsFromBegin = tracker.getAuthorsCount();
+        this.churnFromBegin = tracker.getChurn();
+        this.maxLOCAddedFromBegin = tracker.getMaxLocAdded();
+
+        // Metrica 1: Grandezza attuale della classe calcolata aritmeticamente
+        this.totalLocAddedFromBegin = tracker.getTotalLocAdded();
+        this.totalLocDeletedFromBegin = tracker.getTotalLocDeleted();
+        // Medie storiche
+        this.avgLOCAddedFromBegin = this.numRevisionsFromBegin == 0 ? 0.0 : (double) this.totalLocAddedFromBegin / this.numRevisionsFromBegin;
+
+        this.totalChangeSetFromBegin = tracker.getTotalChangeSet();
+        this.maxChangeSetFromBegin = tracker.getMaxChangeSet();
+        this.avgChangeSetFromBegin = this.numRevisionsFromBegin == 0 ? 0.0 : (double) this.totalChangeSetFromBegin / this.numRevisionsFromBegin;
+    }
+
+    public void processCommitInWindow(int added, int deleted, int changeSetSize, boolean isFix,
+                                      String author, LocalDate commitDate, LocalDate releaseDate) {
+
+        // Accumulatori Base
+        this.numRevisions++;
+        if (isFix) this.numFixes++;
+
+        this.authorsInRelease.add(author);
+        this.numAuthors = this.authorsInRelease.size();
+
+        long commitChurn = added + deleted;
+        this.churn += commitChurn;
+
+        // LOC e ChangeSet
+        this.totalLocAddedInRelease += added;
+        this.maxLOCAdded = Math.max(this.maxLOCAdded, added);
+        this.avgLOCAdded = (double) this.totalLocAddedInRelease / this.numRevisions;
+
+        this.totalChangeSetInRelease += changeSetSize;
+        this.maxChangeSet = Math.max(this.maxChangeSet, changeSetSize);
+        this.avgChangeSet = (double) this.totalChangeSetInRelease / this.numRevisions;
+
+        // Frequenza (Metrica 20)
+        if (this.firstTouchedInRelease == null || commitDate.isBefore(this.firstTouchedInRelease)) {
+            this.firstTouchedInRelease = commitDate;
+        }
+        if (this.lastTouchedInRelease == null || commitDate.isAfter(this.lastTouchedInRelease)) {
+            this.lastTouchedInRelease = commitDate;
+        }
+
+        long daysBetween = ChronoUnit.DAYS.between(this.firstTouchedInRelease, this.lastTouchedInRelease);
+        this.avgTimeBetweenCommits = daysBetween == 0 ? (double) this.numRevisions : (double) this.numRevisions / daysBetween;
+
+        // Weighted Age (Formula di Moser: Somma(Age * Churn) / Churn Totale)
+        long commitAgeInDays = Math.max(0, ChronoUnit.DAYS.between(commitDate, releaseDate));
+        this.weightedAgeNumerator += (commitAgeInDays * commitChurn);
+        this.weightedAge = this.churn == 0 ? 0.0 : this.weightedAgeNumerator / this.churn;
+    }
+
+    public void setAgeOfRelease(long ageInDays) {
+        this.age = ageInDays;
+    }
+
+    // ========================================================================
+    // TUTTI I GETTER E SETTER (Nessun buco lasciato)
+    // ========================================================================
 
     public String getProjectName(){
         return this.release.getProjectName();
@@ -74,26 +158,119 @@ public class Class {
         return this.release.getID();
     }
 
-    public double setWeightedAge(){
-        return (age / churn);
+    public int getNumber(){
+        return this.release.getProgressiveNumber();
+    }
+
+    // --- Smells, Ops e Buggy ---
+
+    public int getNumSmells(){
+        return Math.toIntExact(numSmells);
     }
 
     public void setNumSmells(long num){
         this.numSmells = num;
     }
 
+    public int getNumOps() {
+        return numOps;
+    }
+
     public void setNumOps(int num){
         this.numOps = num;
     }
 
-    public int getNumber(){
-        return this.release.getProgressiveNumber();
+    public boolean isBuggy() {
+        return isBuggy;
     }
 
-    public int getNumOps() {
-        return numOps;
+    public void setBuggy(boolean buggy) {
+        isBuggy = buggy;
     }
-    public int getNumSmells(){
-        return Math.toIntExact(numSmells);
+
+    // --- Features Getters ---
+
+    public void setLOC(int loc){
+        this.LOC = loc;
+    }
+
+    public long getLOC() {
+        return LOC;
+    }
+
+    public long getNumRevisions() {
+        return numRevisions;
+    }
+
+    public long getNumRevisionsFromBegin() {
+        return numRevisionsFromBegin;
+    }
+
+    public long getNumFixes() {
+        return numFixes;
+    }
+
+    public long getNumFixesFromBegin() {
+        return numFixesFromBegin;
+    }
+
+    public long getNumAuthors() {
+        return numAuthors;
+    }
+
+    public long getNumAuthorsFromBegin() {
+        return numAuthorsFromBegin;
+    }
+
+    public long getChurn() {
+        return churn;
+    }
+
+    public long getChurnFromBegin() {
+        return churnFromBegin;
+    }
+
+    public long getMaxLOCAdded() {
+        return maxLOCAdded;
+    }
+
+    public long getMaxLOCAddedFromBegin() {
+        return maxLOCAddedFromBegin;
+    }
+
+    public double getAvgLOCAdded() {
+        return avgLOCAdded;
+    }
+
+    public double getAvgLOCAddedFromBegin() {
+        return avgLOCAddedFromBegin;
+    }
+
+    public double getAvgChangeSet() {
+        return avgChangeSet;
+    }
+
+    public double getAvgChangeSetFromBegin() {
+        return avgChangeSetFromBegin;
+    }
+
+    public double getMaxChangeSet() {
+        return maxChangeSet;
+    }
+
+    public double getMaxChangeSetFromBegin() {
+        return maxChangeSetFromBegin;
+    }
+
+    public long getAge() {
+        return age;
+    }
+
+    public double getWeightedAge() {
+        return weightedAge;
+    }
+
+    public double getAvgTimeBetweenCommits() {
+        return avgTimeBetweenCommits;
     }
 }

@@ -25,7 +25,7 @@ public class DatasetDAO {
              PrintWriter pw = new PrintWriter(fw)){
 
             if (isNewFile) {
-                pw.println("ProjectName,ClassName,ReleaseID,numOps,numSmells");
+                pw.println("ProjectName,ClassName,ReleaseID,numOps,numSmells,LOC");
             }
 
             List<Class> classes = release.getClasses();
@@ -40,7 +40,8 @@ public class DatasetDAO {
                 sb.append(progressiveNumber).append(",");
                 // We will complete the dataset with other iterations
                 sb.append(c.getNumOps()).append(",");
-                sb.append(c.getNumSmells()).append("");
+                sb.append(c.getNumSmells()).append(",");
+                sb.append(c.getLOC()).append("");
                 pw.println(sb.toString());
             }
 
@@ -49,40 +50,59 @@ public class DatasetDAO {
         }
     }
 
-    public static void writeReleaseComplete(Release release) throws PersistenceException {
+    private static void writeReleaseComplete(Release release) throws PersistenceException {
         boolean isNewFile = !new File(datasetFile).exists();
         try (FileWriter fw = new FileWriter(datasetFile, true);
              PrintWriter pw = new PrintWriter(fw)){
 
             if (isNewFile) {
-                pw.println("ProjectName,ClassName,ReleaseID,"+
-                        "LOC,LOCFromBegin,numRevisions,numRevisionsFromBegin,"+
-                        "numFixes,numFixesFromBegin,numAuthors,numAuthorsFromBegin,"+
+                pw.println("ProjectName,ClassName,ReleaseID," +
+                        "LOC,numRevisions,numRevisionsFromBegin," +
+                        "numFixes,numFixesFromBegin,numAuthors,numAuthorsFromBegin," +
                         "churn,churnFromBegin,maxLOCAdded,maxLOCAddedFromBegin," +
                         "avgLOCAdded,avgLOCAddedFromBegin,avgChangeSet,avgChangeSetFromBegin," +
-                        "age,weightedAge,numOps,avgTimeBetweenCommits,numSmells," +
-                        "isBuggy");
+                        "maxChangeSet,maxChangeSetFromBegin,age,weightedAge," +
+                        "numOps,avgTimeBetweenCommits,numSmells,isBuggy");
             }
 
             List<Class> classes = release.getClasses();
             String projectName = release.getProjectName();
             int progressiveNumber = release.getProgressiveNumber();
-            for (Class c : classes) {
 
+            for (Class c : classes) {
                 StringBuilder sb = new StringBuilder();
 
                 sb.append(projectName).append(",");
                 sb.append(c.getName()).append(",");
                 sb.append(progressiveNumber).append(",");
-                /*
 
+                sb.append(c.getLOC()).append(",");
+                sb.append(c.getNumRevisions()).append(",");
+                sb.append(c.getNumRevisionsFromBegin()).append(",");
+                sb.append(c.getNumFixes()).append(",");
+                sb.append(c.getNumFixesFromBegin()).append(",");
+                sb.append(c.getNumAuthors()).append(",");
+                sb.append(c.getNumAuthorsFromBegin()).append(",");
+                sb.append(c.getChurn()).append(",");
+                sb.append(c.getChurnFromBegin()).append(",");
+                sb.append(c.getMaxLOCAdded()).append(",");
+                sb.append(c.getMaxLOCAddedFromBegin()).append(",");
+                sb.append(c.getAvgLOCAdded()).append(",");
+                sb.append(c.getAvgLOCAddedFromBegin()).append(",");
+                sb.append(c.getAvgChangeSet()).append(",");
+                sb.append(c.getAvgChangeSetFromBegin()).append(",");
+                sb.append(c.getMaxChangeSet()).append(",");
+                sb.append(c.getMaxChangeSetFromBegin()).append(",");
+                sb.append(c.getAge()).append(",");
+                sb.append(c.getWeightedAge()).append(",");
 
-                OTHER FEATURES
-
-
-                */
                 sb.append(c.getNumOps()).append(",");
-                sb.append(c.getNumSmells()).append("");
+                sb.append(c.getAvgTimeBetweenCommits()).append(",");
+                sb.append(c.getNumSmells()).append(",");
+
+                // Forzato a false come richiesto
+                sb.append("false");
+
                 pw.println(sb.toString());
             }
 
@@ -101,7 +121,7 @@ public class DatasetDAO {
         br.readLine();
         while ((line = br.readLine()) != null) {
             String[] data = line.split(csvSplitBy);
-            if (data.length >= 5) {
+            if (data.length >= 6) {
                 ClassDTO extracted = extractClass(data);
                 toReturn.add(extracted);
             }
@@ -117,7 +137,14 @@ private static ClassDTO extractClass(String[] data) {
     int progressiveNumber = Integer.parseInt(data[2].trim());
     int numOps = Integer.parseInt(data[3].trim());
     int numSmell = Integer.parseInt(data[4].trim());
-    return new ClassDTO(pathName, progressiveNumber, numSmell, numOps);
+    int loc = Integer.parseInt(data[5].trim());
+    return new ClassDTO(pathName, progressiveNumber, numSmell, numOps, loc);
+    }
+
+public static void writeDataset(List<Release> releases) throws PersistenceException {
+    for (Release rel : releases) {
+            writeReleaseComplete(rel);
+        }
     }
 }
 

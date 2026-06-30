@@ -78,4 +78,7 @@ public class ProjectInfoBean {
         return sonarPath;
     }
 
+    public void setProjectName(String name){
+        this.projectName = name;
+    }
 }

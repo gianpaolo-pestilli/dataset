@@ -1,85 +1,3 @@
-//package boundary;
-//
-//import java.io.*;
-//import java.net.URL;
-//import java.nio.charset.Charset;
-//
-//import exception.ConfigException;
-//import exception.JiraException;
-//import org.json.JSONArray;
-//import org.json.JSONException;
-//import org.json.JSONObject;
-//import settings.PropertiesSetter;
-//
-//public class JiraInteraction {
-//
-//    private static String readAll(Reader rd) throws IOException {
-//        StringBuilder sb = new StringBuilder();
-//        int cp;
-//        while ((cp = rd.read()) != -1) {
-//            sb.append((char) cp);
-//        }
-//        return sb.toString();
-//    }
-//
-//    public static JSONArray readJsonArrayFromUrl(String url) throws IOException, JSONException {
-//        InputStream is = new URL(url).openStream();
-//        try {
-//            BufferedReader rd = new BufferedReader(new InputStreamReader(is, Charset.forName("UTF-8")));
-//            String jsonText = readAll(rd);
-//            JSONArray json = new JSONArray(jsonText);
-//            return json;
-//        } finally {
-//                is.close();
-//            }
-//    }
-//
-//
-//    public static JSONObject readJsonFromUrl(String url) throws IOException, JSONException {
-//        InputStream is = new URL(url).openStream();
-//            try {
-//                BufferedReader rd = new BufferedReader(new InputStreamReader(is, Charset.forName("UTF-8")));
-//                String jsonText = readAll(rd);
-//                JSONObject json = new JSONObject(jsonText);
-//                return json;
-//            } finally {
-//                is.close();
-//            }
-//    }
-//
-//
-//    public static void printTicket() throws IOException, JSONException, JiraException {
-//        String projName = null;
-//        try {
-//            projName = PropertiesSetter.getProjectName();
-//        } catch (ConfigException e){
-//            throw new JiraException(e.getMessage());
-//        }
-//
-//        Integer j = 0, i = 0, total = 1;
-//            //Get JSON API for closed bugs w/ AV in the project
-//            do {
-//                //Only gets a max of 1000 at a time, so must do this multiple times if bugs >1000
-//                j = i + 1000;
-//                String url = "https://issues.apache.org/jira/rest/api/2/search?jql=project=%22"
-//                        + projName + "%22AND%22issueType%22=%22Bug%22AND(%22status%22=%22closed%22OR"
-//                        + "%22status%22=%22resolved%22)AND%22resolution%22=%22fixed%22&fields=key,resolutiondate,versions,created&startAt="
-//                        + i.toString() + "&maxResults=" + j.toString();
-//                JSONObject json = readJsonFromUrl(url);
-//                JSONArray issues = json.getJSONArray("issues");
-//                total = json.getInt("total");
-//                for (; i < total && i < j; i++) {
-//                    //Iterate through each bug
-//                    String key = issues.getJSONObject(i%1000).get("key").toString();
-//
-//                    // Still understanding where to store this information
-//                    System.out.println(key);
-//                }
-//            } while (i < total);
-//        }
-//
-//
-
 package boundary.api;
 import bean.ProjectInfoBean;
 import bean.ReleaseBean;
@@ -92,10 +10,9 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-
+import java.util.*;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 
 public class JiraInteraction {
 
@@ -153,4 +70,38 @@ public class JiraInteraction {
             return releases;
         }
 
+
+    public static Set<String> getBugFixIds(ProjectInfoBean info) throws JiraException {
+
+        String projectName = info.getProjectName();
+        projectName = projectName.toUpperCase();
+        Set<String> bugFixIds = new HashSet<>();
+        int startAt = 0;
+        int maxResults = 1000;
+        int total = 0;
+
+        String jql = String.format(
+                "project=\"%s\" AND issueType=\"Bug\" AND (status=\"closed\" OR status=\"resolved\") AND resolution=\"fixed\"",
+                projectName
+        );
+        String encodedJql = URLEncoder.encode(jql, StandardCharsets.UTF_8);
+
+        do {
+            String url = "https://issues.apache.org/jira/rest/api/2/search?jql=" + encodedJql +
+                    "&fields=key&startAt=" + startAt + "&maxResults=" + maxResults;
+
+            String jsonResponse = fetchJson(url);
+            JSONObject json = new JSONObject(jsonResponse);
+
+            JSONArray issues = json.getJSONArray("issues");
+            total = json.getInt("total");
+
+            for (int i = 0; i < issues.length(); i++) {
+                bugFixIds.add(issues.getJSONObject(i).getString("key"));
+            }
+            startAt += maxResults;
+
+        } while (startAt < total);
+        return bugFixIds;
     }
+}

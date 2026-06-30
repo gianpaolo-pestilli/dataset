@@ -2,9 +2,10 @@ HOW TO USE THE config.properties file:
 
 application.type=SMELL_RANKING
     It may be one of the following:
-        DATASET_INIT,
-        DATASET_POPULATION,
-        EFFORT_RANKING,
+        DATASET_INIT
+        DATASET_POPULATION
+        DATASET_LABELING
+        EFFORT_RANKING
         SMELL_RANKING
         DEBT_RANKING
         APPLICATIVE_RANKING

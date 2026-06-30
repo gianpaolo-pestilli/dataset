@@ -45,7 +45,7 @@ public class ApplicativeRankingController extends AppController {
 
 
     private ClassesBean convertToBean(Class c) {
-        return new ClassesBean(c.getName(), c.getNumSmells(),null);
+        return new ClassesBean(c.getName(), c.getNumSmells(),null,null);
     }
 
     private List<ClassesBean> convert(List<Class> classes){
