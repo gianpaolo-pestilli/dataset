@@ -72,7 +72,7 @@ public class ReleaseDAO {
         }
     }
 
-    public static List<Release> getAllReleases() throws PersistenceException {
+    public static List<Release> getVeryFirstReleases() throws PersistenceException {
         // Return the first 33% of the releases (from first_releases.csv)
         List<Release> releases = new ArrayList<>();
         String csvFile = firstReleasesFilename;
@@ -104,6 +104,48 @@ public class ReleaseDAO {
         Release release = new Release(projectName,releaseDate,JiraID,tag);
         release.setProgressiveNumber(progressiveNumber);
         return release;
+    }
+
+    public static List<Release> getEveryRelease() throws PersistenceException {
+        List<Release> releases = new ArrayList<>();
+        String csvFile = allReleasesFilename;
+        String line;
+        String csvSplitBy = ",";
+
+        try (BufferedReader br = new BufferedReader(new FileReader(csvFile))) {
+            br.readLine();
+            while ((line = br.readLine()) != null) {
+                String[] data = line.split(csvSplitBy);
+                if (data.length >= 5) {
+                    Release release = getRelease(data);
+                    releases.add(release);
+                }
+            }
+        } catch (IOException e) {
+            throw new PersistenceException("Error occurred while reading file: " + csvFile +"\n"+e.getMessage());
+        }
+        return releases;
+    }
+
+    public static int getMaxID() throws PersistenceException{
+        int maxID = 0;
+        String csvFile = firstReleasesFilename;
+        String line;
+        String csvSplitBy = ",";
+
+        try (BufferedReader br = new BufferedReader(new FileReader(csvFile))) {
+            br.readLine();
+            while ((line = br.readLine()) != null) {
+                String[] data = line.split(csvSplitBy);
+                if (data.length >= 5) {
+                    int num = Integer.parseInt(data[0].trim());
+                    if (num > maxID){maxID = num;}
+                }
+            }
+        } catch (IOException e) {
+            throw new PersistenceException("Error occurred while reading file: " + csvFile +"\n"+e.getMessage());
+        }
+        return maxID;
     }
 
 }

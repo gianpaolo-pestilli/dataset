@@ -273,4 +273,40 @@ public class Class {
     public double getAvgTimeBetweenCommits() {
         return avgTimeBetweenCommits;
     }
+
+    public void setNumRevisionsFromBegin(long numRevisionsFromBegin) {
+        this.numRevisionsFromBegin = numRevisionsFromBegin;
+    }
+
+    public void setNumFixesFromBegin(long numFixesFromBegin) {
+        this.numFixesFromBegin = numFixesFromBegin;
+    }
+
+    public void setNumAuthorsFromBegin(long numAuthorsFromBegin) {
+        this.numAuthorsFromBegin = numAuthorsFromBegin;
+    }
+
+    public void setChurnFromBegin(long churnFromBegin) {
+        this.churnFromBegin = churnFromBegin;
+    }
+
+    public void setMaxLOCAddedFromBegin(long maxLOCAddedFromBegin) {
+        this.maxLOCAddedFromBegin = maxLOCAddedFromBegin;
+    }
+
+    public void setAvgLOCAddedFromBegin(double avgLOCAddedFromBegin) {
+        this.avgLOCAddedFromBegin = avgLOCAddedFromBegin;
+    }
+
+    public void setAvgChangeSetFromBegin(double avgChangeSetFromBegin) {
+        this.avgChangeSetFromBegin = avgChangeSetFromBegin;
+    }
+
+    public void setMaxChangeSetFromBegin(double maxChangeSetFromBegin) {
+        this.maxChangeSetFromBegin = maxChangeSetFromBegin;
+    }
+
+    public void label(){
+        this.isBuggy = true;
+    }
 }

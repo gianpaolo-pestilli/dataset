@@ -141,10 +141,84 @@ private static ClassDTO extractClass(String[] data) {
     return new ClassDTO(pathName, progressiveNumber, numSmell, numOps, loc);
     }
 
-public static void writeDataset(List<Release> releases) throws PersistenceException {
+
+    public static void writeDataset(List<Release> releases) throws PersistenceException {
     for (Release rel : releases) {
             writeReleaseComplete(rel);
         }
+    }
+
+
+    public static void writeFinalDataset(List<Release> releases) throws PersistenceException {
+        for (Release rel : releases) {
+            writeLabeledRelease(rel);
+        }
+    }
+
+    private static void writeLabeledRelease(Release release) throws PersistenceException {
+
+        boolean isNewFile = !new File(datasetFile).exists();
+        try (FileWriter fw = new FileWriter(datasetFile, true);
+             PrintWriter pw = new PrintWriter(fw)){
+
+            if (isNewFile) {
+                pw.println("ProjectName,ClassName,ReleaseID," +
+                        "LOC,numRevisions,numRevisionsFromBegin," +
+                        "numFixes,numFixesFromBegin,numAuthors,numAuthorsFromBegin," +
+                        "churn,churnFromBegin,maxLOCAdded,maxLOCAddedFromBegin," +
+                        "avgLOCAdded,avgLOCAddedFromBegin,avgChangeSet,avgChangeSetFromBegin," +
+                        "maxChangeSet,maxChangeSetFromBegin,age,weightedAge," +
+                        "numOps,avgTimeBetweenCommits,numSmells,isBuggy");
+            }
+
+            List<Class> classes = release.getClasses();
+            String projectName = release.getProjectName();
+            int progressiveNumber = release.getProgressiveNumber();
+
+            for (Class c : classes) {
+                StringBuilder sb = new StringBuilder();
+
+                sb.append(projectName).append(",");
+                sb.append(c.getName()).append(",");
+                sb.append(progressiveNumber).append(",");
+
+                sb.append(c.getLOC()).append(",");
+                sb.append(c.getNumRevisions()).append(",");
+                sb.append(c.getNumRevisionsFromBegin()).append(",");
+                sb.append(c.getNumFixes()).append(",");
+                sb.append(c.getNumFixesFromBegin()).append(",");
+                sb.append(c.getNumAuthors()).append(",");
+                sb.append(c.getNumAuthorsFromBegin()).append(",");
+                sb.append(c.getChurn()).append(",");
+                sb.append(c.getChurnFromBegin()).append(",");
+                sb.append(c.getMaxLOCAdded()).append(",");
+                sb.append(c.getMaxLOCAddedFromBegin()).append(",");
+                sb.append(c.getAvgLOCAdded()).append(",");
+                sb.append(c.getAvgLOCAddedFromBegin()).append(",");
+                sb.append(c.getAvgChangeSet()).append(",");
+                sb.append(c.getAvgChangeSetFromBegin()).append(",");
+                sb.append(c.getMaxChangeSet()).append(",");
+                sb.append(c.getMaxChangeSetFromBegin()).append(",");
+                sb.append(c.getAge()).append(",");
+                sb.append(c.getWeightedAge()).append(",");
+
+                sb.append(c.getNumOps()).append(",");
+                sb.append(c.getAvgTimeBetweenCommits()).append(",");
+                sb.append(c.getNumSmells()).append(",");
+
+                sb.append(c.isBuggy());
+
+                pw.println(sb.toString());
+            }
+
+        } catch (IOException e) {
+            throw new PersistenceException("Error while writing release to dataset file: " + e.getMessage());
+        }
+    }
+
+    public static List<Release> getDataset() throws PersistenceException{
+
+
     }
 }
 

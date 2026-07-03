@@ -9,6 +9,8 @@ import dao.DatasetDAO;
 import dao.ReleaseDAO;
 import exception.*;
 import settings.PropertiesSetter;
+
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -134,17 +136,29 @@ public class DatasetController extends AppController {
                 }
             }
         }
+
         toSet.sort(Comparator.comparing(ReleaseBean::getReleaseDate)
                 .thenComparing(ReleaseBean::getVersion));
 
-        // We want to get rid of releases such as -M or .M because they are not official, they are milestones
-        // Incubating releases are official releases, so I'm keeping them only if a git tag exists
-        List<ReleaseBean> filtered = new ArrayList<>();
+        List<ReleaseBean> noMilestones = new ArrayList<>();
         for (ReleaseBean rel : toSet) {
             if (!(rel.getVersion().contains("-M") || rel.getVersion().contains(".M"))) {
-                filtered.add(rel);
+                noMilestones.add(rel);
             }
         }
+
+        List<ReleaseBean> filtered = new ArrayList<>();
+        LocalDate last = null;
+
+        for (ReleaseBean rel : noMilestones){
+            LocalDate newDate = rel.getReleaseDate();
+
+            if(last == null || !newDate.equals(last)){
+                filtered.add(rel);
+                last = newDate;
+            }
+        }
+
         setAllReleases(filtered);
     }
 
