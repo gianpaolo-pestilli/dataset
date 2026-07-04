@@ -12,7 +12,7 @@ import java.util.List;
 public class DatasetDAO {
     private static final String datasetFile = "dataset.csv";
     private static final String sonarDataset = "dataset-sonar.csv";
-
+    private static final String officialDataset = "dataset-official.csv";
     public static String getDatasetFilename(){return datasetFile;}
 
     public static String getSonarDataset(){return sonarDataset;}
@@ -157,8 +157,8 @@ private static ClassDTO extractClass(String[] data) {
 
     private static void writeLabeledRelease(Release release) throws PersistenceException {
 
-        boolean isNewFile = !new File(datasetFile).exists();
-        try (FileWriter fw = new FileWriter(datasetFile, true);
+        boolean isNewFile = !new File(officialDataset).exists();
+        try (FileWriter fw = new FileWriter(officialDataset, true);
              PrintWriter pw = new PrintWriter(fw)){
 
             if (isNewFile) {
@@ -216,9 +216,68 @@ private static ClassDTO extractClass(String[] data) {
         }
     }
 
-    public static List<Release> getDataset() throws PersistenceException{
+    public static List<Release> getDataset() throws PersistenceException {
+        List<Release> releases = new ArrayList<>();
+        int currentReleaseId = 0;
+        Release currentRelease = null;
+        String line;
+        String csvSplitBy = ",";
 
+        try (BufferedReader br = new BufferedReader(new FileReader(datasetFile))) {
+            // Salta l'intestazione iniziale del file CSV
+            br.readLine();
 
+            while ((line = br.readLine()) != null) {
+                String[] data = line.split(csvSplitBy);
+
+                if (data.length >= 26) {
+                    int releaseId = Integer.parseInt(data[2].trim());
+
+                    // Se incontriamo un nuovo ReleaseID, istanziamo un nuovo oggetto Release
+                    if (currentReleaseId != releaseId) {
+                        currentRelease = new Release(data[0].trim(),releaseId);
+                        releases.add(currentRelease);
+                        currentReleaseId = releaseId;
+                    }
+
+                    String name = data[1].trim();
+                    int loc = Integer.parseInt(data[3].trim());
+                    int numOps = Integer.parseInt(data[22].trim());
+                    int numSmells = Integer.parseInt(data[24].trim());
+
+                    Class c = new Class(currentRelease,name,numSmells,numOps,loc);
+                    c.setNumRevisions(Long.parseLong(data[4].trim()));
+
+                    c.setNumRevisionsFromBegin(Long.parseLong(data[5].trim()));
+
+                    c.setNumFixes(Long.parseLong(data[6].trim()));
+                    c.setNumFixesFromBegin(Long.parseLong(data[7].trim()));
+                    c.setNumAuthors(Long.parseLong(data[8].trim()));
+                    c.setNumAuthorsFromBegin(Long.parseLong(data[9].trim()));
+                    c.setChurn(Long.parseLong(data[10].trim()));
+                    c.setChurnFromBegin(Long.parseLong(data[11].trim()));
+                    c.setMaxLOCAdded(Long.parseLong(data[12].trim()));
+                    c.setMaxLOCAddedFromBegin(Long.parseLong(data[13].trim()));
+                    c.setAvgLOCAdded(Double.parseDouble(data[14].trim()));
+                    c.setAvgLOCAddedFromBegin(Double.parseDouble(data[15].trim()));
+                    c.setAvgChangeSet(Double.parseDouble(data[16].trim()));
+                    c.setAvgChangeSetFromBegin(Double.parseDouble(data[17].trim()));
+                    c.setMaxChangeSet(Double.parseDouble(data[18].trim()));
+                    c.setMaxChangeSetFromBegin(Double.parseDouble(data[19].trim()));
+
+                    c.setAgeOfRelease(Long.parseLong(data[20].trim()));
+                    c.setWAge(Double.parseDouble(data[21].trim()));
+                    c.setAvgTimeBetweenCommits(Double.parseDouble(data[23].trim()));
+                    c.setBuggy(Boolean.parseBoolean(data[25].trim()));
+
+                    currentRelease.addClass(c);
+                }
+            }
+        } catch (IOException | NumberFormatException e) {
+            throw new PersistenceException("Errore critico durante la ricostruzione del dataset dal file: " + e.getMessage());
+        }
+
+        return releases;
     }
 }
 

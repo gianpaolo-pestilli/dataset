@@ -309,4 +309,42 @@ public class Class {
     public void label(){
         this.isBuggy = true;
     }
+    public void setNumRevisions(long rev){
+        this.numRevisions = rev;
+    }
+
+    public void setNumFixes(long numF){
+        this.numFixes = numF;
+    }
+
+    public void setNumAuthors(long auth){
+        this.numAuthors = auth;
+    }
+
+    public void setChurn(long ch){
+        this.churn = ch;
+    }
+    public void setMaxLOCAdded(long loc){
+        this.maxLOCAdded = loc;
+    }
+
+    public void setAvgLOCAdded(double avg){
+        this.avgLOCAdded = avg;
+    }
+
+    public void setAvgChangeSet(double d){
+        this.avgChangeSet = d;
+    }
+
+    public void setMaxChangeSet(double a){
+        this.maxChangeSet = a;
+    }
+
+    public void setWAge(double d){
+        this.weightedAge = d;
+    }
+    public void setAvgTimeBetweenCommits(double time){
+        this.avgTimeBetweenCommits = time;
+    }
+
 }

@@ -7,18 +7,16 @@ import java.util.List;
 
 public class Ticket {
 
-    public Ticket(LocalDate creationDate, List<String> classes){
-        this.creationDate = creationDate;
+    public Ticket(List<String> classes){
         this.affectedClasses = classes;
     }
 
-    // This is a buggy ticket
-    private LocalDate creationDate; // To understand the opening version
+    public static int numInconsistentOV = 0;
+
 
     private List<String> affectedClasses;
 
     private boolean consistent;
-    private boolean hasCommit; // If not, this ticket doesn't exist
 
     private int OV;
     private int IV;
@@ -57,12 +55,6 @@ public class Ticket {
         return proportionIncrement/numberProportions;
     }
 
-    public void setCommit(boolean b){
-        this.hasCommit = b;
-        if(!b){
-            this.consistent = false;
-        }
-    }
 
     public void setVersions(int IV, int OV, int FV) throws VersionException {
         if(FV <= OV){
@@ -71,11 +63,13 @@ public class Ticket {
         }
         this.OV = OV;
         this.FV = FV;
-        if(IV <= OV){
+
+        if((IV <= OV) && (IV != -1)){
             this.consistent = true;
             this.IV = IV;
         }else{
             this.consistent = false;
+            numInconsistentOV++;
         }
         incrementProportion();
     }
@@ -90,5 +84,9 @@ public class Ticket {
 
     public int getFV() {
         return this.FV;
+    }
+
+    public static int getInconsistentTickets(){
+        return numInconsistentOV;
     }
 }

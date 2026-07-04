@@ -1,12 +1,15 @@
 package control;
 
+import bean.CommitBean;
 import bean.ProjectInfoBean;
 import bean.ReleaseBean;
 import bean.TicketBean;
+import boundary.api.GitInteraction;
 import boundary.api.JiraInteraction;
 import dao.DatasetDAO;
 import dao.ProportionDAO;
 import dao.ReleaseDAO;
+import dao.dto.TicketDTO;
 import entity.Class;
 import entity.LabelClass;
 import entity.Release;
@@ -14,8 +17,13 @@ import entity.Ticket;
 import exception.*;
 import settings.PropertiesSetter;
 
+import java.sql.SQLOutput;
+import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.zip.DeflaterOutputStream;
 
 public class LabelingController extends AppController{
 
@@ -24,6 +32,8 @@ public class LabelingController extends AppController{
     private List<Release> allConsideredReleases = new ArrayList<>(); // 100% of filtered releases
 
     private List<Ticket> allTickets = new ArrayList<>(); // All consistent and not consistent tickets
+
+    private List<CommitBean> allCommits = new ArrayList<>();
 
     private double proportion;
 
@@ -35,6 +45,7 @@ public class LabelingController extends AppController{
         String projectName;
         String owner;
         String repo;
+        String path;
         try {
             projectName = PropertiesSetter.getProjectName();
             owner = PropertiesSetter.getOwner();
@@ -46,18 +57,31 @@ public class LabelingController extends AppController{
                     owner,
                     repo
             );
-            this.allJiraReleases = JiraInteraction.getAllReleases(param);
-            this.allConsideredReleases = ReleaseDAO.getEveryRelease();
-            this.toLabel = DatasetDAO.getDataset();
+            path = PropertiesSetter.getProjectLocalPath();
+            param.setLocalPath(path);
 
-            List<TicketBean> ticketFromJira = JiraInteraction.getAllTickets();
-            filterTicket(ticketFromJira);
+            this.allJiraReleases = JiraInteraction.getAllReleases(param);
+
+
+            this.allConsideredReleases = ReleaseDAO.getEveryRelease();
+
+
+            this.toLabel = DatasetDAO.getDataset(); // Dataset in RAM
+
+
+            List<TicketBean> ticketFromJira = JiraInteraction.getAllTickets(param);
+
+
+            this.allCommits = GitInteraction.extractAllCommits(param);
+
+
+            filterTicket(param,ticketFromJira);
 
             this.proportion = Ticket.evaluateProportion();
 
             doLabeling();
 
-        } catch (ConfigException|JiraException|PersistenceException e) {
+        } catch (ConfigException|JiraException|PersistenceException|GitException e) {
             throw new ControllerException("Error: " + e.getMessage());
         }
 
@@ -69,9 +93,13 @@ public class LabelingController extends AppController{
     public void finish() throws ControllerException {
         try{
             double percentage = evalPercentage();
+
             ProportionDAO.writeProportion(this.proportion);
             ProportionDAO.writePercentage(percentage);
+
+
             DatasetDAO.writeFinalDataset(this.toLabel);
+
         }catch (PersistenceException e){
             throw new ControllerException(e.getMessage());
         }
@@ -86,10 +114,33 @@ public class LabelingController extends AppController{
         return name1.equals(name2);
     }
 
-    private void filterTicket(List<TicketBean> tickets){
+    private void filterTicket(ProjectInfoBean info, List<TicketBean> tickets) throws ControllerException{
+        try {
+            // If a ticket has no commits we discard it
+            Set<String> ticketTrovatiSuGit = GitInteraction.getBuggyMessageID(info);
+            tickets.removeIf(ticket -> !ticketTrovatiSuGit.contains(ticket.getTicketID()));
 
-        // this.allTickets will be a consistent set of values
 
+        // We have only committed tickets
+        List<Ticket> actualTickets = new ArrayList<>();
+        for(TicketBean tick : tickets){
+            int OV = getOpening(tick);
+                if(OV != -1){ // Not ignored
+                    int possibleIV = getPossibleInjected(tick);
+                    TicketDTO t = getFixed(tick);
+                    int FV = t.index();
+                    if(FV != -1){
+                        List<String> affectedClasses = t.words();
+                        Ticket ticket = new Ticket(affectedClasses);
+                        ticket.setVersions(possibleIV,OV,FV);
+                        allTickets.add(ticket);
+                    }
+                }
+        }
+
+        } catch (GitException | VersionException e) {
+            throw new ControllerException(e.getMessage());
+        }
 
     }
 
@@ -129,6 +180,138 @@ public class LabelingController extends AppController{
         // In toLabel we have the labeled classes
 
         }
+
+    int getOpening(TicketBean t) {
+        LocalDate l = t.getCreationDate();
+
+        // Protezione di base
+        if (allConsideredReleases == null || allConsideredReleases.isEmpty()) {
+            return -1;
+        }
+
+        // Regola 3: Ticket aperto prima della primissima release nota -> Ignoro
+        if (l.isBefore(allConsideredReleases.get(0).getReleaseDate())) {
+            return -1;
+        }
+
+        // Regola 1: Finestra temporale tra una release e la successiva
+        for (int i = 0; i < allConsideredReleases.size() - 1; i++) {
+            LocalDate first = allConsideredReleases.get(i).getReleaseDate();
+            LocalDate second = allConsideredReleases.get(i + 1).getReleaseDate();
+
+            // Se la data è >= first e strettamente < second
+            if (!l.isBefore(first) && l.isBefore(second)) {
+                return allConsideredReleases.get(i).getProgressiveNumber();
+            }
+        }
+
+        // Regola 2: Ticket aperto dopo l'ultima release a disposizione -> Ignoro
+        return -1;
+    }
+
+    public int getPossibleInjected(TicketBean ticket) {
+        List<String> affectedIds = ticket.getAllAffectedVersionsID();
+
+        // Nessuna AV da Jira -> ci penserà il Proportion
+        if (affectedIds == null || affectedIds.isEmpty()) {
+            return -1;
+        }
+
+        // 1. e 2. Recupero le date da Jira
+        List<LocalDate> affectedDates = new ArrayList<>();
+        for (String id : affectedIds) {
+            for (bean.ReleaseBean jiraRel : allJiraReleases) {
+                if (jiraRel.getID().equals(id) && jiraRel.getReleaseDate() != null) {
+                    affectedDates.add(jiraRel.getReleaseDate());
+                    break;
+                }
+            }
+        }
+
+        if (affectedDates.isEmpty()) {
+            return -1;
+        }
+
+        // 3. Prendo la data più vecchia dell'infezione
+        java.util.Collections.sort(affectedDates);
+        LocalDate oldestDate = affectedDates.get(0);
+
+        if (allConsideredReleases == null || allConsideredReleases.isEmpty()) {
+            return -1;
+        }
+
+        // 4. Mappatura esatta o successiva (Regola di Y)
+        for (Release release : allConsideredReleases) {
+            // !release.getReleaseDate().isBefore(oldestDate) equivale a: releaseDate >= oldestDate
+            if (!release.getReleaseDate().isBefore(oldestDate)) {
+                return release.getProgressiveNumber();
+            }
+        }
+
+
+        return -1;
+    }
+
+    public TicketDTO getFixed(TicketBean ticket) {
+        // 1. Filtro i commit che appartengono a questo ticket
+        List<CommitBean> commitsPerTicket = new ArrayList<>();
+        int version = -1;
+
+        for (CommitBean cb : this.allCommits) {
+            if (ticket.getTicketID().equals(cb.getTicketId())) {
+                commitsPerTicket.add(cb);
+            }
+        }
+
+        if (commitsPerTicket.isEmpty()) {
+            version = -1;
+        }
+
+        // 2. Aggrego classi (Set per evitare duplicati) e trovo data più recente
+        Set<String> allAffectedClasses = new HashSet<>();
+        LocalDate latestDate = null;
+
+        for (CommitBean cb : commitsPerTicket) {
+            allAffectedClasses.addAll(cb.getTouchedClasses());
+
+            if (latestDate == null || cb.getDate().isAfter(latestDate)) {
+                latestDate = cb.getDate();
+            }
+        }
+
+        // 3. Aggiorno il TicketBean con le informazioni trovate
+        // Assumo che TicketBean abbia i metodi set per queste informazioni
+
+
+        List<String> affected = new ArrayList<>(allAffectedClasses);
+
+
+        if (allConsideredReleases == null || allConsideredReleases.isEmpty()) {
+            version = -1;
+        }
+
+        for (Release release : allConsideredReleases) {
+            if (!release.getReleaseDate().isBefore(latestDate)) {
+                version = release.getProgressiveNumber();
+            }
+        }
+
+        return new TicketDTO(version,affected);
+    }
+
+    private double evalPercentage(){
+        double buggyClasses = 0;
+        double allClasses = 0;
+        for(Release r : toLabel){
+            for(Class c : r.getClasses()){
+                allClasses++;
+                if(c.isBuggy()){
+                    buggyClasses++;
+                }
+            }
+        }
+        return buggyClasses/allClasses;
+    }
 
 
 }

@@ -1,31 +1,31 @@
 package bean;
 
-import entity.Ticket;
-
 import java.time.LocalDate;
 import java.util.List;
 
 public class TicketBean {
 
-    public TicketBean(int FVreleaseID,
-                      List<Integer> affectedversions,
-                      LocalDate creation,
-                      List<String> classes){
-        this.FVreleaseID = FVreleaseID;
-        this.allAffectedVersionsID = affectedversions;
-        this.creationDate = creation;
+    private String ticketID;
+    private LocalDate creationDate; // OV
+    private List<String> allAffectedVersionsID; // IVs (ID interni di Jira, es. "144434")
 
-    }
-
-    private int FVreleaseID;
-
-    private List<Integer> allAffectedVersionsID;
-
-    private LocalDate creationDate; //For the OV
-
+    // Campi che verranno popolati successivamente da Git
+    private int fvReleaseID;
     private List<String> affectedClasses;
 
+    public TicketBean(String ticketID, LocalDate creationDate, List<String> allAffectedVersionsID) {
+        this.ticketID = ticketID;
+        this.creationDate = creationDate;
+        this.allAffectedVersionsID = allAffectedVersionsID;
+    }
 
+    public String getTicketID() { return ticketID; }
+    public LocalDate getCreationDate() { return creationDate; }
+    public List<String> getAllAffectedVersionsID() { return allAffectedVersionsID; }
 
+    public void setFvReleaseID(int fvReleaseID) { this.fvReleaseID = fvReleaseID; }
+    public int getFvReleaseID() { return fvReleaseID; }
 
+    public void setAffectedClasses(List<String> affectedClasses) { this.affectedClasses = affectedClasses; }
+    public List<String> getAffectedClasses() { return affectedClasses; }
 }

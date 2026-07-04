@@ -1,6 +1,7 @@
 package boundary.api;
 import bean.ProjectInfoBean;
 import bean.ReleaseBean;
+import bean.TicketBean;
 import exception.JiraException;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -103,5 +104,66 @@ public class JiraInteraction {
 
         } while (startAt < total);
         return bugFixIds;
+    }
+
+
+    public static List<TicketBean> getAllTickets(ProjectInfoBean info) throws JiraException {
+        String projectName = info.getProjectName().toUpperCase();
+        List<TicketBean> tickets = new ArrayList<>();
+
+        int startAt = 0;
+        int maxResults = 1000;
+        int total = 0;
+
+        // Query JQL blindata
+        String jql = String.format(
+                "project=\"%s\" AND issueType=\"Bug\" AND (status=\"closed\" OR status=\"resolved\") AND resolution=\"fixed\"",
+                projectName
+        );
+        String encodedJql = URLEncoder.encode(jql, StandardCharsets.UTF_8);
+
+        do {
+            // Ottimizzazione: scarichiamo solo key, created e versions
+            String url = "https://issues.apache.org/jira/rest/api/2/search?jql=" + encodedJql +
+                    "&fields=key,created,versions&startAt=" + startAt + "&maxResults=" + maxResults;
+
+            String jsonResponse = fetchJson(url);
+            JSONObject json = new JSONObject(jsonResponse);
+
+            JSONArray issues = json.getJSONArray("issues");
+            total = json.getInt("total");
+
+            for (int i = 0; i < issues.length(); i++) {
+                JSONObject issue = issues.getJSONObject(i);
+
+                // 1. ID del Ticket (es. SYNCOPE-123)
+                String key = issue.getString("key");
+
+                JSONObject fields = issue.getJSONObject("fields");
+
+                // 2. Data di Creazione (Opening Version)
+                String createdStr = fields.getString("created");
+                // Tronchiamo la stringa ISO 8601 per prendere solo YYYY-MM-DD
+                LocalDate creationDate = LocalDate.parse(createdStr.substring(0, 10));
+
+                // 3. ID interni di Jira delle Affected Versions (Injected Versions)
+                List<String> affectedVersionsIds = new ArrayList<>();
+                if (fields.has("versions")) {
+                    JSONArray versionsArray = fields.getJSONArray("versions");
+                    for (int j = 0; j < versionsArray.length(); j++) {
+                        JSONObject versionObj = versionsArray.getJSONObject(j);
+                        affectedVersionsIds.add(versionObj.getString("id"));
+                    }
+                }
+
+                // Costruiamo e aggiungiamo il Bean alla lista
+                tickets.add(new TicketBean(key, creationDate, affectedVersionsIds));
+            }
+
+            startAt += maxResults;
+
+        } while (startAt < total);
+
+        return tickets;
     }
 }

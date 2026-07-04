@@ -24,6 +24,12 @@ public class Release {
 
         private List<Class> classes = new ArrayList<>();
 
+
+        public Release(String projectName, int progressiveNumber){
+            this.projectName = projectName;
+            this.progressiveNumber = progressiveNumber;
+        }
+
         public Release(String projectName,
                        LocalDate releaseDate,
                        String releaseID,
@@ -98,6 +104,9 @@ public class Release {
             return ageInDays;
         }
 
+        public void addClass(Class c){
+            this.classes.add(c);
+        }
     }
 
 
