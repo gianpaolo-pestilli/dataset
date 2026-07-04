@@ -1,9 +1,6 @@
 package control;
 
-import bean.CommitBean;
-import bean.ProjectInfoBean;
-import bean.ReleaseBean;
-import bean.TicketBean;
+import bean.*;
 import boundary.api.GitInteraction;
 import boundary.api.JiraInteraction;
 import dao.DatasetDAO;
@@ -38,6 +35,10 @@ public class LabelingController extends AppController{
     private double proportion;
 
     private List<Release> toLabel = new ArrayList<>();
+
+    private double howManyInconsistent;
+    private double howManyFake;
+    private double ticketsWithNoCommit;
 
     @Override
     public void start() throws ControllerException{
@@ -79,6 +80,8 @@ public class LabelingController extends AppController{
 
             this.proportion = Ticket.evaluateProportion();
 
+            userBoundary.printMessage(new MessageBean("Evaluated proportion = " + this.proportion));
+
             doLabeling();
 
         } catch (ConfigException|JiraException|PersistenceException|GitException e) {
@@ -96,7 +99,9 @@ public class LabelingController extends AppController{
 
             ProportionDAO.writeProportion(this.proportion);
             ProportionDAO.writePercentage(percentage);
-
+            ProportionDAO.writeTicketWithNoCommit(this.ticketsWithNoCommit);
+            ProportionDAO.writeFake(this.howManyFake);
+            ProportionDAO.writeInconsistent(this.howManyInconsistent);
 
             DatasetDAO.writeFinalDataset(this.toLabel);
 
@@ -118,8 +123,9 @@ public class LabelingController extends AppController{
         try {
             // If a ticket has no commits we discard it
             Set<String> ticketTrovatiSuGit = GitInteraction.getBuggyMessageID(info);
-            tickets.removeIf(ticket -> !ticketTrovatiSuGit.contains(ticket.getTicketID()));
-
+            double initialSize = tickets.size(); // 1. Salviamo la cardinalità iniziale
+            tickets.removeIf(ticket -> !ticketTrovatiSuGit.contains(ticket.getTicketID())); // 2. Rimuoviamo
+            this.ticketsWithNoCommit = (initialSize - tickets.size())/(initialSize);
 
         // We have only committed tickets
         List<Ticket> actualTickets = new ArrayList<>();
@@ -137,8 +143,22 @@ public class LabelingController extends AppController{
                     }
                 }
         }
+        this.howManyFake = Ticket.getInexisting();
+        this.howManyInconsistent = Ticket.getInconsistentTickets();
+        double card = allTickets.size();
 
-        } catch (GitException | VersionException e) {
+        this.howManyFake = howManyFake/card;
+        this.howManyInconsistent = howManyInconsistent/card;
+
+        List<Ticket> valid = new ArrayList<>();
+        for(Ticket t: allTickets){
+            if(t.isValid()){
+                valid.add(t);
+            }
+        }
+        allTickets = valid;
+
+        } catch (GitException e) {
             throw new ControllerException(e.getMessage());
         }
 
@@ -147,6 +167,7 @@ public class LabelingController extends AppController{
     private void doLabeling() throws ControllerException{
         List<LabelClass> classes = new ArrayList<>();
         for(Ticket t: this.allTickets){
+            t.estimateIV(this.proportion);
             int first = t.getIV();
             int last = t.getFV()-1; // Last one is not buggy
             for(String classname : t.getAffectedClasses()){
@@ -293,6 +314,7 @@ public class LabelingController extends AppController{
         for (Release release : allConsideredReleases) {
             if (!release.getReleaseDate().isBefore(latestDate)) {
                 version = release.getProgressiveNumber();
+                break;
             }
         }
 

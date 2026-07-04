@@ -2,7 +2,6 @@ package entity;
 
 import exception.VersionException;
 
-import java.time.LocalDate;
 import java.util.List;
 
 public class Ticket {
@@ -11,8 +10,8 @@ public class Ticket {
         this.affectedClasses = classes;
     }
 
-    public static int numInconsistentOV = 0;
-
+    public static int numInconsistentIV = 0;
+    public static int notExistingBuggy = 0;
 
     private List<String> affectedClasses;
 
@@ -21,6 +20,8 @@ public class Ticket {
     private int OV;
     private int IV;
     private int FV;
+
+    private boolean valid = true;
 
     // To evaluate PROPORTION
     private static double proportionIncrement;
@@ -39,7 +40,7 @@ public class Ticket {
 
     // Call only after Proportion evaluation
     public void estimateIV(double proportion){
-        if(consistent){
+        if(consistent || !valid){
             return; // Nothing to do
         }
         // If not consistent
@@ -47,31 +48,49 @@ public class Ticket {
         double second = (FV - OV)*proportion;
         int secondTerm = (int)Math.round(second);
         this.IV = firstTerm - secondTerm;
-
+        if (this.OV < this.IV){
+            this.IV = this.OV;
+        }
     }
 
     // Call this only at the end !!! TOTAL APPROACH
     public static double evaluateProportion(){
+
+        if(numberProportions == 0){return 0;}
+
         return proportionIncrement/numberProportions;
     }
 
 
-    public void setVersions(int IV, int OV, int FV) throws VersionException {
-        if(FV <= OV){
-            // Fixed at the same release you opened... Something is not correct
-            throw new VersionException("FV = OV");
-        }
-        this.OV = OV;
-        this.FV = FV;
+    public void setVersions(int IV, int OV, int FV)  {
 
-        if((IV <= OV) && (IV != -1)){
+        this.FV = FV; // The only thing we know
+        this.OV = OV;
+
+
+
+        if(FV <= OV){
+            // we want to think that programmer wanted to open the ticket at the IV
+            if((IV == -1) || (IV >= FV)){
+                // This bug doesn't exist
+                this.valid = false;
+                notExistingBuggy++;
+                return;
+            } else {
+                this.OV = IV;
+            }
+        }
+
+        // Now that we know the bug exists
+        if((IV == -1) || (this.OV < IV)){
+            // Can't rely on IV
+            this.consistent = false;
+            numInconsistentIV++;
+        } else {
             this.consistent = true;
             this.IV = IV;
-        }else{
-            this.consistent = false;
-            numInconsistentOV++;
+            incrementProportion();
         }
-        incrementProportion();
     }
 
     public List<String> getAffectedClasses(){
@@ -87,6 +106,12 @@ public class Ticket {
     }
 
     public static int getInconsistentTickets(){
-        return numInconsistentOV;
+        return numInconsistentIV;
     }
+
+    public static int getInexisting(){
+        return notExistingBuggy;
+    }
+
+    public boolean isValid(){return valid;}
 }
