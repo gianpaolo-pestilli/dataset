@@ -49,13 +49,13 @@ public class WekaWorker {
         }
 
         if (dataset.classIndex() == -1) dataset.setClassIndex(dataset.numAttributes() - 1);
-        int buggyClassIndex = dataset.classAttribute().indexOfValue("YES");
+        int buggyClassIndex = dataset.classAttribute().indexOfValue("true");
         if (buggyClassIndex == -1) buggyClassIndex = 1;
 
         // 2. TRASFORMAZIONE MANUALE (LOG)
         // Questa sostituisce l'uso di filtri complessi e potenzialmente errati
         List<String> excludedAttrs = Arrays.asList(
-                "releaseID", "numAuthorsFromBegin", "avgChangeSetFromBegin",
+                "ReleaseID", "numAuthorsFromBegin", "avgChangeSetFromBegin",
                 "maxChangeSetFromBegin", "age"
         );
 
