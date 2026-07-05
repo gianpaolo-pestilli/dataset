@@ -1,5 +1,0 @@
-PROPORTION = 1.28390993959363;
-PERCENTUALE CLASSI BUGGY = 7.883650952858575%
-Il 3.397508493771234% dei tickets non aveva un commit associato;
-PERCENTUALE BUG INESISTENTI: 0.25673940949935814% di tutti i ticket con commit;
-Proportion necessaria per la IV del 21.822849807445444% di tutti i ticket con commit associato;
