@@ -1,10 +1,12 @@
 package control;
 
 import bean.MessageBean;
+import dao.DatasetDAO;
 import dao.MLDatasetDAO;
 import entity.Classifier;
 import entity.WekaWorker;
 import exception.ControllerException;
+import exception.PersistenceException;
 import settings.ExperimentGenerator;
 
 import java.util.ArrayList;
@@ -17,7 +19,7 @@ public class MLController extends AppController{
 
     private List<Classifier> classifiers;
 
-    private int numThreads = 6; // For my machine it's the best
+    private int numThreads = 3; // For my machine it's the best
 
     @Override
     public void start() throws ControllerException {
@@ -34,6 +36,8 @@ public class MLController extends AppController{
         // Questa lista ci serve per tenere traccia dello stato di avanzamento di ogni singolo task
         List<Future<?>> futures = new ArrayList<>();
 
+        String name = MLDatasetDAO.getDataset();
+
         // 3. Buttiamo tutti gli esperimenti nella cesta (la coda dell'executor)
         for (Classifier cls : classifiers) {
 
@@ -44,7 +48,8 @@ public class MLController extends AppController{
                 try {
                     long startTime = System.currentTimeMillis();
 
-                    WekaWorker weka = new WekaWorker(cls);
+                    WekaWorker weka = new WekaWorker(cls, name);
+                    // Technically, it has to be a boundary responsibility, but we don't have "time" to instantiate a useless bean
                     weka.run();
 
                     long elapsed = (System.currentTimeMillis() - startTime) / 1000;
@@ -76,10 +81,12 @@ public class MLController extends AppController{
 
     @Override
     public void finish() throws ControllerException {
+    try{
 
         MLDatasetDAO.writeResults(this.classifiers);
 
+    } catch (PersistenceException e) {
+        throw new ControllerException(e.getMessage());
     }
-
-
+    }
 }

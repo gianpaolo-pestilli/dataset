@@ -10,12 +10,15 @@ public class ExperimentGenerator {
 
     public static List<Classifier> generateClassifiers() {
         List<Classifier> toRet = new ArrayList<>();
-        for(FeatureSelection selection : FeatureSelection.values()){
-            for(Balancing bal : Balancing.values()){
-                for(Validation val : Validation.values()){
-                    Experiment exp = new Experiment(selection,bal,val);
-                    for(ClassifierName classifier : ClassifierName.values()){
-                        toRet.add(new Classifier(classifier,exp));
+
+        for(ManualCut c : ManualCut.values()){
+            for(FeatureSelection selection : FeatureSelection.values()){
+                for(Balancing bal : Balancing.values()){
+                    for(Validation val : Validation.values()){
+                        Experiment exp = new Experiment(selection,bal,val,c);
+                            for(ClassifierName classifier : ClassifierName.values()){
+                            toRet.add(new Classifier(classifier,exp));
+                        }
                     }
                 }
             }

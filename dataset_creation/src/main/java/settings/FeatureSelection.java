@@ -2,5 +2,5 @@ package settings;
 
 public enum FeatureSelection {
     NO,
-    FORWARD
+    FILTER
 }

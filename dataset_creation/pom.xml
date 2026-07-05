@@ -12,7 +12,11 @@
         <maven.compiler.source>25</maven.compiler.source>
         <maven.compiler.target>25</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <sonar.organization>gianpaolo-pestilli</sonar.organization>
+
     </properties>
+
+
 
     <dependencies>
         <dependency>
@@ -46,5 +50,17 @@
                 <artifactId>json</artifactId>
                 <version>20231013</version>
             </dependency>
+
+        <dependency>
+            <groupId>nz.ac.waikato.cms.weka</groupId>
+            <artifactId>weka-stable</artifactId>
+            <version>3.8.6</version>
+        </dependency>
+
+        <dependency>
+            <groupId>nz.ac.waikato.cms.weka</groupId>
+            <artifactId>SMOTE</artifactId>
+            <version>1.0.3</version>
+        </dependency>
         </dependencies>
 </project>
