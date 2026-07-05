@@ -1,0 +1,12 @@
+package settings;
+
+public enum ApplicationType {
+    DATASET_INIT,
+    DATASET_POPULATION,
+    DATASET_LABELING,
+    EFFORT_RANKING,
+    SMELL_RANKING,
+    DEBT_RANKING,
+    APPLICATIVE_RANKING,
+    ML_TRAINING
+}

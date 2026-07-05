@@ -1,0 +1,42 @@
+HOW TO USE THE config.properties file:
+
+application.type=SMELL_RANKING
+    It may be one of the following:
+        DATASET_INIT
+        DATASET_POPULATION
+        DATASET_LABELING
+        EFFORT_RANKING
+        SMELL_RANKING
+        DEBT_RANKING
+        APPLICATIVE_RANKING
+        ML_TRAINING
+
+effort-ranking.count=0
+    To avoid overriding previous files with new releases
+
+smells-ranking.count=0
+    To avoid overriding previous files with new releases
+
+effort-ranking.file=effort_ranking_
+    The name of the file which contains the effort ranking, the number 0 is the official one, the others are experiments
+
+smells-ranking.file=smells_ranking_
+    The name of the file which contains the smells ranking, the number 0 is the official one, the others are experiments
+
+smells-ranking.touched
+    It is 0 if the last smells-ranking created file hasn't been touched yet, 1 otherwise
+
+effort-ranking.touched
+    It is 0 if the last effort-ranking created file hasn't been touched yet, 1 otherwise
+
+project.name=SYNCOPE
+    The project name
+
+sonar.project.key=gianpaolo-pestilli_syncope2
+    The project key in SonarQube
+
+project.owner=gianpaolo-pestilli
+    The owner of the repository
+
+project.repo=syncope
+    The name of the repository
