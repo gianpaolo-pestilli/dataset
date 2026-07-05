@@ -7,5 +7,6 @@ public enum ApplicationType {
     EFFORT_RANKING,
     SMELL_RANKING,
     DEBT_RANKING,
-    APPLICATIVE_RANKING
+    APPLICATIVE_RANKING,
+    ML_TRAINING
 }
