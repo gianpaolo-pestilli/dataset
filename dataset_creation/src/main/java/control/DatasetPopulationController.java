@@ -108,9 +108,16 @@ public class DatasetPopulationController extends AppController {
             df.setRepository(repo);
             df.setDetectRenames(true);
 
+            LocalDate projectStartDate = null;
+
             for (RevCommit commit : walk) {
                 LocalDate commitDate = commit.getAuthorIdent().getWhen().toInstant()
                         .atZone(ZoneId.systemDefault()).toLocalDate();
+
+                // Essendo la camminata in REVERSE, il primo commit che incontriamo è l'inizio assoluto del progetto
+                if (projectStartDate == null) {
+                    projectStartDate = commitDate;
+                }
 
                 if (commitDate.isAfter(lastReleaseDate)) continue;
 
@@ -147,13 +154,22 @@ public class DatasetPopulationController extends AppController {
                         for (Class cls : currentRelease.getClasses()) {
                             if (isSameClass(cls.getName(), path)) {
                                 cls.updateFromTracker(tracker);
-                                cls.processCommitInWindow(added, deleted, diffs.size(), isFix, authorEmail, commitDate, currentRelease.getReleaseDate());
+                                cls.processCommitInWindow(added, deleted, diffs.size(), isFix, authorEmail, commitDate, projectStartDate);
                                 break;
                             }
                         }
                     }
                 }
             }
+
+            // Calcolo Age in Settimane cumulativo sulla Release
+            for (Release rel : this.releases) {
+                if (projectStartDate != null && rel.getReleaseDate() != null) {
+                    long weeks = ChronoUnit.WEEKS.between(projectStartDate, rel.getReleaseDate());
+                    rel.setAge(Math.max(0, weeks));
+                }
+            }
+
         } catch (IOException e) {
             throw new ControllerException("Errore Git: " + e.getMessage());
         }

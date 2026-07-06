@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 public class ReportDAO {
 
     private static final String PATH_CSV = "performance.csv";
-    private static final String PATH_PDF = "Report_Finale.pdf";
+    private static final String PATH_PDF = "Grafici_classificatori.pdf";
 
     public static List<ExperimentResult> loadResults() throws PersistenceException {
         try {

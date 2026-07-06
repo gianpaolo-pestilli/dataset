@@ -10,8 +10,6 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class MLReportingController extends AppController {
-    private final String PATH_CSV = "performance.csv";
-    private final String PATH_PDF = "Report_Finale.pdf";
 
     @Override
     public void start() throws ControllerException {
@@ -38,7 +36,7 @@ public class MLReportingController extends AppController {
             // Persistenza delegata al DAO
             ReportDAO.saveReport(groups, charts);
 
-            userBoundary.printMessage(new bean.MessageBean("Report salvato in " + PATH_PDF));
+            userBoundary.printMessage(new bean.MessageBean("Report salvato in nel file "));
         } catch (PersistenceException e) {
             throw new ControllerException("Errore di persistenza: " + e.getMessage());
         }

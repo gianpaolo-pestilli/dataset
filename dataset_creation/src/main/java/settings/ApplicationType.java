@@ -9,5 +9,6 @@ public enum ApplicationType {
     DEBT_RANKING,
     APPLICATIVE_RANKING,
     ML_TRAINING,
-    ML_REPORTING
+    ML_REPORTING,
+    ML_DATA_PARTITION
 }

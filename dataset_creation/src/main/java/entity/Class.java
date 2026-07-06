@@ -56,7 +56,6 @@ public class Class {
     private double maxChangeSet;
     private double maxChangeSetFromBegin;
 
-    private long age; //Of the release
     private double weightedAge; //By LOC
 
     // My metrics
@@ -100,7 +99,7 @@ public class Class {
     }
 
     public void processCommitInWindow(int added, int deleted, int changeSetSize, boolean isFix,
-                                      String author, LocalDate commitDate, LocalDate releaseDate) {
+                                      String author, LocalDate commitDate, LocalDate projectStartDate) {
 
         // Accumulatori Base
         this.numRevisions++;
@@ -132,14 +131,13 @@ public class Class {
         long daysBetween = ChronoUnit.DAYS.between(this.firstTouchedInRelease, this.lastTouchedInRelease);
         this.avgTimeBetweenCommits = daysBetween == 0 ? (double) this.numRevisions : (double) this.numRevisions / daysBetween;
 
-        // Weighted Age (Formula di Moser: Somma(Age * Churn) / Churn Totale)
-        long commitAgeInDays = Math.max(0, ChronoUnit.DAYS.between(commitDate, releaseDate));
-        this.weightedAgeNumerator += (commitAgeInDays * commitChurn);
+        // Weighted Age (Formula di Moser: Somma(Age_in_weeks * Churn) / Churn Totale)
+        long commitAgeInWeeks = 0;
+        if (projectStartDate != null) {
+            commitAgeInWeeks = Math.max(0, ChronoUnit.WEEKS.between(projectStartDate, commitDate));
+        }
+        this.weightedAgeNumerator += (commitAgeInWeeks * commitChurn);
         this.weightedAge = this.churn == 0 ? 0.0 : this.weightedAgeNumerator / this.churn;
-    }
-
-    public void setAgeOfRelease(long ageInDays) {
-        this.age = ageInDays;
     }
 
     // ========================================================================
@@ -262,8 +260,9 @@ public class Class {
         return maxChangeSetFromBegin;
     }
 
+    // L'ETÀ ORA VIENE PRESA DALLA RELEASE
     public long getAge() {
-        return age;
+        return this.release != null ? this.release.getAge() : 0;
     }
 
     public double getWeightedAge() {
@@ -345,6 +344,10 @@ public class Class {
     }
     public void setAvgTimeBetweenCommits(double time){
         this.avgTimeBetweenCommits = time;
+    }
+
+    public void setRelease(Release rel){
+        this.release = rel;
     }
 
 }
