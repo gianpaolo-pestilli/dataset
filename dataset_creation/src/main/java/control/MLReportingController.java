@@ -35,6 +35,7 @@ public class MLReportingController extends AppController {
 
             // Persistenza delegata al DAO
             ReportDAO.saveReport(groups, charts);
+            ReportDAO.generateBoxPlotPDF();
 
             userBoundary.printMessage(new bean.MessageBean("Report salvato in nel file "));
         } catch (PersistenceException e) {

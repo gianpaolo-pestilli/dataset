@@ -91,4 +91,18 @@ public class MLDataController extends AppController {
             }
         }
     }
+
+    public List<Release> getAllDataset(){
+        return allDataset;
+    }
+    public List<Release> getSmelledDataset(){
+        return smelledDataset;
+    }
+    public List<Release> getNotSmelledDataset(){
+        return notSmelledDataset;
+    }
+    public List<Release> getCleanedDataset(){
+        return cleanedDataset;
+    }
+
 }

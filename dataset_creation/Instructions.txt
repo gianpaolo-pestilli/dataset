@@ -12,6 +12,7 @@ application.type=SMELL_RANKING
         ML_TRAINING
         ML_REPORTING
         ML_DATA_PARTITION
+        ML_WHAT_IF
 
 effort-ranking.count=0
     To avoid overriding previous files with new releases

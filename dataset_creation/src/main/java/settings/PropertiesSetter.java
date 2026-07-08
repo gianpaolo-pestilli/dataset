@@ -48,6 +48,7 @@ public class PropertiesSetter {
                 case ML_TRAINING ->{return new MLUserInterface();}
                 case ML_REPORTING -> {return new MLReportInterface();}
                 case ML_DATA_PARTITION ->{return new MLDataInterface();}
+                case ML_WHAT_IF -> {return new MLWhatIfInterface();}
                 default -> throw new ConfigException("Invalid application parameters");
             }
 

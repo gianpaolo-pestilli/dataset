@@ -10,5 +10,7 @@ public enum ApplicationType {
     APPLICATIVE_RANKING,
     ML_TRAINING,
     ML_REPORTING,
-    ML_DATA_PARTITION
+    ML_DATA_PARTITION,
+    ML_WHAT_IF
+
 }
