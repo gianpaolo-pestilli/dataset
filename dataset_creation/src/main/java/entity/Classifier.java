@@ -1,23 +1,21 @@
 package entity;
 
 import settings.ClassifierName;
-import settings.ExperimentGenerator;
 
-import java.util.List;
 
 public class Classifier {
     private ClassifierName name;
     private double precision;
     private double recall;
-    private double AUC;
+    private double auc;
     private double kappa;
     private double accuracy;
     private Experiment experiment;
 
-    private long TP;
-    private long FP;
-    private long TN;
-    private long FN;
+    private long tp;
+    private long fp;
+    private long tn;
+    private long fn;
 
 
 
@@ -50,12 +48,12 @@ public class Classifier {
         this.recall = recall;
     }
 
-    public double getAUC() {
-        return AUC;
+    public double getAuc() {
+        return auc;
     }
 
-    public void setAUC(double AUC) {
-        this.AUC = AUC;
+    public void setAuc(double auc) {
+        this.auc = auc;
     }
 
     public double getKappa() {
@@ -83,36 +81,36 @@ public class Classifier {
         this.experiment = experiment;
     }
 
-    public long getTP() {
-        return TP;
+    public long getTp() {
+        return tp;
     }
 
-    public void setTP(long TP) {
-        this.TP = TP;
+    public void setTp(long tp) {
+        this.tp = tp;
     }
 
-    public long getFP() {
-        return FP;
+    public long getFp() {
+        return fp;
     }
 
-    public void setFP(long FP) {
-        this.FP = FP;
+    public void setFp(long fp) {
+        this.fp = fp;
     }
 
-    public long getTN() {
-        return TN;
+    public long getTn() {
+        return tn;
     }
 
-    public void setTN(long TN) {
-        this.TN = TN;
+    public void setTn(long tn) {
+        this.tn = tn;
     }
 
-    public long getFN() {
-        return FN;
+    public long getFn() {
+        return fn;
     }
 
-    public void setFN(long FN) {
-        this.FN = FN;
+    public void setFn(long fn) {
+        this.fn = fn;
     }
 
 

@@ -74,7 +74,7 @@ public class SmellClassesDAO extends ClassesDAO {
                             int numSmell = Integer.parseInt(parts[4].trim());
                             Class c = new Class(className, numSmell);
                             classes.add(c);
-                        } catch (NumberFormatException ex) {
+                        } catch (NumberFormatException _) {
                             // Ignore
                         }
                     }

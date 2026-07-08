@@ -63,13 +63,13 @@ public class MLDatasetDAO {
             sb.append(String.format(Locale.US, "%.3f", classf.getAccuracy())).append(",");
             sb.append(String.format(Locale.US, "%.3f", classf.getPrecision())).append(",");
             sb.append(String.format(Locale.US, "%.3f", classf.getRecall())).append(",");
-            sb.append(String.format(Locale.US, "%.3f", classf.getAUC())).append(",");
+            sb.append(String.format(Locale.US, "%.3f", classf.getAuc())).append(",");
             sb.append(String.format(Locale.US, "%.3f", classf.getKappa())).append(",");
             // 5. TP, FP, TN, FN
-            sb.append(classf.getTP()).append(",");
-            sb.append(classf.getFP()).append(",");
-            sb.append(classf.getTN()).append(",");
-            sb.append(classf.getFN());
+            sb.append(classf.getTp()).append(",");
+            sb.append(classf.getFp()).append(",");
+            sb.append(classf.getTn()).append(",");
+            sb.append(classf.getFn());
 
             // Scrive la riga nel file
             writer.println(sb.toString());
@@ -88,7 +88,7 @@ public class MLDatasetDAO {
      * Sovrascrive il file ad ogni esecuzione.
      * Nota: Dataset B non ha un valore Actual (dataset sintetico), la cella resta vuota.
      */
-    public static void writeAPTable(int predictedA, int actualA, int predictedB_plus, int acutalB_plus,
+    public static void writeAPTable(int predictedA, int actualA, int predictedBplus, int acutalBplus,
                                     int predictedB,
                                     int predictedC, int actualC) throws PersistenceException {
 
@@ -97,7 +97,7 @@ public class MLDatasetDAO {
             writer.println("Dataset,Actual,Expected");
 
             writer.println("A," + actualA + "," + predictedA);
-            writer.println("B+," + acutalB_plus + "," + predictedB_plus);
+            writer.println("B+," + acutalBplus + "," + predictedBplus);
             writer.println("B,," + predictedB); // Actual vuoto: dataset sintetico
             writer.println("C," + actualC + "," + predictedC);
 

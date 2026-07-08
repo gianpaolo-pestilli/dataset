@@ -15,7 +15,7 @@ public class CorrelationAnalyzer {
     // sia la variante "in release" sia la variante "FromBegin".
     private static final Map<String, ToDoubleFunction<Class>> METRICS = new LinkedHashMap<>();
     static {
-        METRICS.put("LOC", Class::getLOC);
+        METRICS.put("LOC", Class::getLoc);
 
         METRICS.put("numRevisions", Class::getNumRevisions);
         METRICS.put("numRevisionsFromBegin", Class::getNumRevisionsFromBegin);

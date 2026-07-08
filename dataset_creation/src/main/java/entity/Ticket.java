@@ -15,9 +15,9 @@ public class Ticket {
 
     private boolean consistent;
 
-    private int OV;
-    private int IV;
-    private int FV;
+    private int ov;
+    private int iv;
+    private int fv;
 
     private boolean valid = true;
 
@@ -27,8 +27,8 @@ public class Ticket {
 
     private void incrementProportion(){
         if(consistent){
-            double num = (double) FV - IV;
-            double den = (double) FV - OV;
+            double num = (double) fv - iv;
+            double den = (double) fv - ov;
             double proportion = num/den;
             // Accesso esplicito alla classe per eliminare lo smell
             Ticket.proportionIncrement += proportion;
@@ -43,12 +43,12 @@ public class Ticket {
             return; // Nothing to do
         }
         // If not consistent
-        int firstTerm = FV;
-        double second = (FV - OV)*proportion;
+        int firstTerm = fv;
+        double second = (fv - ov)*proportion;
         int secondTerm = (int)Math.round(second);
-        this.IV = firstTerm - secondTerm;
-        if (this.OV < this.IV){
-            this.IV = this.OV;
+        this.iv = firstTerm - secondTerm;
+        if (this.ov < this.iv){
+            this.iv = this.ov;
         }
     }
 
@@ -61,33 +61,33 @@ public class Ticket {
     }
 
 
-    public void setVersions(int IV, int OV, int FV)  {
+    public void setVersions(int iv, int ov, int fv)  {
 
-        this.FV = FV; // The only thing we know
-        this.OV = OV;
+        this.fv = fv; // The only thing we know
+        this.ov = ov;
 
-        if(FV <= OV){
+        if(fv <= ov){
             // we want to think that programmer wanted to open the ticket at the IV
-            if((IV == -1) || (IV >= FV)){
+            if((iv == -1) || (iv >= fv)){
                 // This bug doesn't exist
                 this.valid = false;
                 // Accesso esplicito alla classe per eliminare lo smell
                 Ticket.notExistingBuggy++;
                 return;
             } else {
-                this.OV = IV;
+                this.ov = iv;
             }
         }
 
         // Now that we know the bug exists
-        if((IV == -1) || (this.OV < IV)){
+        if((iv == -1) || (this.ov < iv)){
             // Can't rely on IV
             this.consistent = false;
             // Accesso esplicito alla classe per eliminare lo smell
             Ticket.numInconsistentIV++;
         } else {
             this.consistent = true;
-            this.IV = IV;
+            this.iv = iv;
             incrementProportion();
         }
     }
@@ -96,12 +96,12 @@ public class Ticket {
         return this.affectedClasses;
     }
 
-    public int getIV(){
-        return this.IV;
+    public int getIv(){
+        return this.iv;
     }
 
-    public int getFV() {
-        return this.FV;
+    public int getFv() {
+        return this.fv;
     }
 
     public static int getInconsistentTickets(){

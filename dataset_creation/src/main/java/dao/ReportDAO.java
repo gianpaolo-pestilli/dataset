@@ -203,7 +203,6 @@ public class ReportDAO {
         int plotWidth = width - marginLeft - marginRight;
         int plotHeight = height - marginTop - marginBottom;
 
-        double yMin = 0.0;
         double yMax = 1.0;
         int yBase = marginTop + plotHeight;
 

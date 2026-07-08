@@ -69,7 +69,7 @@ public class DatasetBuilderController extends AppController{
                     Class interest = realClasses.get(i);
                     interest.setNumSmells(classes.get(i).getNumSmell());
                     interest.setNumOps(classes.get(i).getNumOps());
-                    interest.setLOC(classes.get(i).getLoc());
+                    interest.setLoc(classes.get(i).getLoc());
                 }
             writeRelease(rel);
 
@@ -81,8 +81,7 @@ public class DatasetBuilderController extends AppController{
 
     @Override
     public void finish() throws ControllerException {
-        String filename = DatasetDAO.getSonarDataset();
-
+        // Nothing to do
     }
 
     private void checkout(ProjectInfoBean project) throws ControllerException {

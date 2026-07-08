@@ -159,8 +159,8 @@ public class LabelingController extends AppController{
         List<LabelClass> classes = new ArrayList<>();
         for(Ticket t: this.allTickets){
             t.estimateIV(this.proportion);
-            int first = t.getIV();
-            int last = t.getFV()-1; // Last one is not buggy
+            int first = t.getIv();
+            int last = t.getFv()-1; // Last one is not buggy
             for(String classname : t.getAffectedClasses()){
                 LabelClass newClass = new LabelClass(classname, first, last);
                 classes.add(newClass);

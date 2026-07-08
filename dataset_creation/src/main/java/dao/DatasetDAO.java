@@ -47,7 +47,7 @@ public class DatasetDAO {
                 // We will complete the dataset with other iterations
                 sb.append(c.getNumOps()).append(",");
                 sb.append(c.getNumSmells()).append(",");
-                sb.append(c.getLOC());
+                sb.append(c.getLoc());
                 pw.println(sb.toString());
             }
 
@@ -82,7 +82,7 @@ public class DatasetDAO {
                 sb.append(c.getName()).append(",");
                 sb.append(progressiveNumber).append(",");
 
-                sb.append(c.getLOC()).append(",");
+                sb.append(c.getLoc()).append(",");
                 sb.append(c.getNumRevisions()).append(",");
                 sb.append(c.getNumRevisionsFromBegin()).append(",");
                 sb.append(c.getNumFixes()).append(",");
@@ -190,7 +190,7 @@ public class DatasetDAO {
                 sb.append(c.getName()).append(",");
                 sb.append(progressiveNumber).append(",");
 
-                sb.append(c.getLOC()).append(",");
+                sb.append(c.getLoc()).append(",");
                 sb.append(c.getNumRevisions()).append(",");
                 sb.append(c.getNumRevisionsFromBegin()).append(",");
                 sb.append(c.getNumFixes()).append(",");
@@ -392,7 +392,7 @@ public class DatasetDAO {
                 sb.append(c.getName()).append(",");
                 sb.append(progressiveNumber).append(",");
 
-                sb.append(c.getLOC()).append(",");
+                sb.append(c.getLoc()).append(",");
                 sb.append(c.getNumRevisions()).append(",");
                 sb.append(c.getNumRevisionsFromBegin()).append(",");
                 sb.append(c.getNumFixes()).append(",");

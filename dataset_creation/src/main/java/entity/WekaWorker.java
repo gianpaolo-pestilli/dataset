@@ -1,9 +1,4 @@
 package entity;
-
-import settings.Balancing;
-import settings.ClassifierName;
-import settings.Validation;
-
 import weka.classifiers.Evaluation;
 import weka.classifiers.bayes.NaiveBayes;
 import weka.classifiers.meta.FilteredClassifier;
@@ -151,10 +146,10 @@ public class WekaWorker {
         classifier.setKappa(eval.kappa());
         classifier.setPrecision(eval.precision(buggyClassIndex));
         classifier.setRecall(eval.recall(buggyClassIndex));
-        classifier.setAUC(eval.areaUnderROC(buggyClassIndex));
-        classifier.setTP((long) eval.numTruePositives(buggyClassIndex));
-        classifier.setFP((long) eval.numFalsePositives(buggyClassIndex));
-        classifier.setTN((long) eval.numTrueNegatives(buggyClassIndex));
-        classifier.setFN((long) eval.numFalseNegatives(buggyClassIndex));
+        classifier.setAuc(eval.areaUnderROC(buggyClassIndex));
+        classifier.setTp((long) eval.numTruePositives(buggyClassIndex));
+        classifier.setFp((long) eval.numFalsePositives(buggyClassIndex));
+        classifier.setTn((long) eval.numTrueNegatives(buggyClassIndex));
+        classifier.setFn((long) eval.numFalseNegatives(buggyClassIndex));
     }
 }

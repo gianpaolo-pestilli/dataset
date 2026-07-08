@@ -8,7 +8,6 @@ import boundary.ranking.ApplicativeRankingUserInterface;
 import boundary.ranking.DebtUserInterface;
 import boundary.ranking.EffortUserInterface;
 import boundary.ranking.SmellUserInterface;
-import control.*;
 import exception.ConfigException;
 
 import java.io.*;

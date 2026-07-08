@@ -18,19 +18,19 @@ public class Class {
         this.release = release;
     }
 
-    public Class(Release release, String name, int numSmells, int numOps, int LOC){
+    public Class(Release release, String name, int numSmells, int numOps, int loc){
         this.className = name;
         this.release = release;
         this.numSmells = numSmells;
         this.numOps = numOps;
-        this.LOC = LOC;
+        this.loc = loc;
     }
 
     private String className;
     private Release release;
 
     // --- Features Esistenti ---
-    private long LOC;
+    private long loc;
 
     private long numRevisions;
     private long numRevisionsFromBegin;
@@ -188,12 +188,12 @@ public class Class {
 
     // --- Features Getters ---
 
-    public void setLOC(int loc){
-        this.LOC = loc;
+    public void setLoc(int loc){
+        this.loc = loc;
     }
 
-    public long getLOC() {
-        return LOC;
+    public long getLoc() {
+        return loc;
     }
 
     public long getNumRevisions() {
