@@ -29,8 +29,8 @@ public class Ticket {
 
     private void incrementProportion(){
         if(consistent){
-            double num = FV-IV;
-            double den = FV-OV;
+            double num = (double) FV - IV;
+            double den = (double) FV - OV;
             double proportion = num/den;
             proportionIncrement += proportion;
             numberProportions++;

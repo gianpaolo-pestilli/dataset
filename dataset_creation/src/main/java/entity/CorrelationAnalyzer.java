@@ -130,8 +130,8 @@ public class CorrelationAnalyzer {
         double r = pc.correlation(x, y);
 
         int n = x.length;
-        double t = r * Math.sqrt(n - 2) / Math.sqrt(1 - r * r);
-        TDistribution tDist = new TDistribution(n - 2);
+        double t = r * Math.sqrt(n - 2.0) / Math.sqrt(1 - r * r);
+        TDistribution tDist = new TDistribution(n - 2.0);
         double pValue = 2 * (1 - tDist.cumulativeProbability(Math.abs(t)));
 
         return new double[]{r, pValue};

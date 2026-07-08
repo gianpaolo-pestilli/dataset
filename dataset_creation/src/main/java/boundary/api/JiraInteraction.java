@@ -1,19 +1,25 @@
 package boundary.api;
+
 import bean.ProjectInfoBean;
 import bean.ReleaseBean;
 import bean.TicketBean;
 import exception.JiraException;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import java.io.*;
+
+import java.io.IOException;
 import java.net.URI;
+import java.net.URLEncoder;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.time.LocalDate;
-import java.util.*;
-import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 public class JiraInteraction {
 
@@ -21,15 +27,17 @@ public class JiraInteraction {
 
     private JiraInteraction(){
         // Making it private
-
     }
+
     private static String fetchJson(String url) throws JiraException {
-        HttpClient client = HttpClient.newHttpClient();
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(url))
-                .build();
-        try {
+        // Implementazione del try-with-resources per chiudere in automatico HttpClient
+        try (HttpClient client = HttpClient.newHttpClient()) {
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(url))
+                    .build();
+
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
             if (response.statusCode() != 200) {
                 throw new JiraException("HTTP error " + response.statusCode() + " — URL: " + url);
             }
@@ -42,39 +50,35 @@ public class JiraInteraction {
         }
     }
 
-
-
     public static List<ReleaseBean> getAllReleases(ProjectInfoBean info) throws JiraException {
         // Ignores the releases with no date and that have not been released yet (they might be changed, pointless studying them)
+        String projectName = info.getProjectName();
+        String url = JIRA_API_BASE + projectName;
+        String json = fetchJson(url);
 
-            String projectName = info.getProjectName();
-            String url = JIRA_API_BASE + projectName;
-            String json = fetchJson(url);
+        JSONObject root = new JSONObject(json);
+        JSONArray versions = root.getJSONArray("versions");
 
-            JSONObject root = new JSONObject(json);
-            JSONArray versions = root.getJSONArray("versions");
+        List<ReleaseBean> releases = new ArrayList<>();
 
-            List<ReleaseBean> releases = new ArrayList<>();
+        for (int i = 0; i < versions.length(); i++) {
+            JSONObject v = versions.getJSONObject(i);
 
-            for (int i = 0; i < versions.length(); i++) {
-                JSONObject v = versions.getJSONObject(i);
+            // Skip releases without date or not yet released
+            if (!v.has("releaseDate") || !v.optBoolean("released", false)) continue;
 
-                // Skip releases without date or not yet released
-                if (!v.has("releaseDate") || !v.optBoolean("released", false)) continue;
+            String id      = v.optString("id", "");
+            String name    = v.optString("name", "");
+            LocalDate date = LocalDate.parse(v.getString("releaseDate"));
 
-                String id      = v.optString("id", "");
-                String name    = v.optString("name", "");
-                LocalDate date = LocalDate.parse(v.getString("releaseDate"));
-
-                releases.add(new ReleaseBean(projectName, date, id, name));
-            }
-
-            // Order by date ascending
-            releases.sort(Comparator.comparing(ReleaseBean::getReleaseDate));
-
-            return releases;
+            releases.add(new ReleaseBean(projectName, date, id, name));
         }
 
+        // Order by date ascending
+        releases.sort(Comparator.comparing(ReleaseBean::getReleaseDate));
+
+        return releases;
+    }
 
     public static Set<String> getBugFixIds(ProjectInfoBean info) throws JiraException {
 
@@ -109,7 +113,6 @@ public class JiraInteraction {
         } while (startAt < total);
         return bugFixIds;
     }
-
 
     public static List<TicketBean> getAllTickets(ProjectInfoBean info) throws JiraException {
         String projectName = info.getProjectName().toUpperCase();

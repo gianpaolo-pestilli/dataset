@@ -37,22 +37,27 @@ public class SonarCloudInteraction {
 
     //  Calling the API...
     private static String fetchJson(String url) throws SonarException {
-        HttpClient client = HttpClient.newHttpClient();
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(url))
-                .GET()
-                .build();
-        HttpResponse<String> response;
-        try{
-             response = client.send(request, HttpResponse.BodyHandlers.ofString());
-        } catch (InterruptedException | IOException e) {
+        // Implementazione del try-with-resources per chiudere in automatico HttpClient
+        try (HttpClient client = HttpClient.newHttpClient()) {
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(url))
+                    .GET()
+                    .build();
+
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+            if (response.statusCode() != 200) {
+                throw new SonarException("Errore HTTP " + response.statusCode() + " — URL: " + url);
+            }
+            return response.body();
+
+        } catch (InterruptedException e) {
+            // Ripristino dello stato di interruzione del thread richiesto da Sonar
+            Thread.currentThread().interrupt();
+            throw new SonarException(e.getMessage());
+        } catch (IOException e) {
             throw new SonarException(e.getMessage());
         }
-
-        if (response.statusCode() != 200) {
-            throw new SonarException("Errore HTTP " + response.statusCode() + " — URL: " + url);
-        }
-        return response.body();
     }
 
     // Building URL...
@@ -150,7 +155,6 @@ public class SonarCloudInteraction {
             result.add(c);
         }
 
-
         return result;
     }
 
@@ -182,8 +186,6 @@ public class SonarCloudInteraction {
         return version.replace("-SNAPSHOT", "").trim();
     }
 
-
-
     public static List<ClassesBean> getClassesFromCurrentRelease(ProjectInfoBean info) throws SonarException {
 
         String projectKey = info.getProjectKey();
@@ -209,14 +211,13 @@ public class SonarCloudInteraction {
             result.add(c);
         }
 
-
         return result;
     }
 
     public static void runScan(ProjectInfoBean info, AppController controller) throws SonarException {
         ProcessBuilder pb = getProcessBuilder(info);
-        try{
-        Process process = pb.start();
+        try {
+            Process process = pb.start();
             try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
                 String line;
                 while ((line = reader.readLine()) != null) {
@@ -228,7 +229,11 @@ public class SonarCloudInteraction {
                 throw new SonarException("Scanning error, code = " + exitCode);
             }
 
-        } catch (IOException | InterruptedException e) {
+        } catch (InterruptedException e) {
+            // Ripristino dello stato di interruzione del thread richiesto da Sonar
+            Thread.currentThread().interrupt();
+            throw new SonarException("Error while scanning (Interrupted): " + e.getMessage());
+        } catch (IOException e) {
             throw new SonarException("Error while scanning: " + e.getMessage());
         }
     }
@@ -241,6 +246,7 @@ public class SonarCloudInteraction {
         String tag = info.getReleaseVersion();
         String organization = info.getProjectOwner();
         String path = info.getLocalPath();
+
         command.add(instruction);
         command.add("-Dsonar.projectKey=" +projectKey);
         command.add("-Dsonar.token=" + token);
@@ -254,13 +260,11 @@ public class SonarCloudInteraction {
         command.add("-Dsonar.inclusions=**/*.java");
         command.add("-Dsonar.exclusions=**/target/**,**/test/**");
 
-
         ProcessBuilder pb = new ProcessBuilder(command);
         pb.directory(new File(path));
         pb.redirectErrorStream(true);
         return pb;
     }
-
 
     public static void waitForAnalysisCompletion(ProjectInfoBean info, AppController controller) throws SonarException {
         String projectKey = info.getProjectKey();

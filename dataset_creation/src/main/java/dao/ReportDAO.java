@@ -53,7 +53,8 @@ public class ReportDAO {
                         byte[] imgData = charts.get(entry.getKey() + "_" + m);
                         if (imgData != null) {
                             PDImageXObject img = PDImageXObject.createFromByteArray(doc, imgData, m);
-                            content.drawImage(img, 50, yPos - 120, 400, 120);
+                            // Aggiunta la 'f' a 120 per castare a float ed evitare lo smell di SonarQube
+                            content.drawImage(img, 50, yPos - 120f, 400, 120);
                             yPos -= 130;
                         }
                     }

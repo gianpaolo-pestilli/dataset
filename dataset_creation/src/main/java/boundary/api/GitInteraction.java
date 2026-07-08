@@ -5,6 +5,7 @@ import bean.ProjectInfoBean;
 import bean.ReleaseBean;
 import exception.GitException;
 import org.eclipse.jgit.api.Git;
+import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.diff.DiffEntry;
 import org.eclipse.jgit.diff.DiffFormatter;
 import org.eclipse.jgit.diff.RawTextComparator;
@@ -38,22 +39,28 @@ public class GitInteraction {
     }
 
     private static String fetchJson(String url) throws GitException {
-        HttpClient client = HttpClient.newHttpClient();
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(url))
-                .header("Accept", "application/vnd.github+json")
-                .GET()
-                .build();
-        HttpResponse<String> response;
-        try {
-            response = client.send(request, HttpResponse.BodyHandlers.ofString());
-        } catch (InterruptedException | IOException e) {
-            throw new GitException(e.getMessage());
+        // Utilizzo del try-with-resources permesso da Java 21 per HttpClient
+        try (HttpClient client = HttpClient.newHttpClient()) {
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(url))
+                    .header("Accept", "application/vnd.github+json")
+                    .GET()
+                    .build();
+
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+            if (response.statusCode() != 200) {
+                throw new GitException("HTTP Error " + response.statusCode() + " — URL: " + url);
+            }
+            return response.body();
+
+        } catch (InterruptedException e) {
+            // Ripristino dello stato di interruzione del thread richiesto da Sonar
+            Thread.currentThread().interrupt();
+            throw new GitException("Richiesta interrotta: " + e.getMessage());
+        } catch (IOException e) {
+            throw new GitException("Errore di I/O: " + e.getMessage());
         }
-        if (response.statusCode() != 200) {
-            throw new GitException("HTTP Error " + response.statusCode() + " — URL: " + url);
-        }
-        return response.body();
     }
 
     // Returns all release versions from Git tags, avoiding the "syncope-" prefix to not create conflict
@@ -94,8 +101,6 @@ public class GitInteraction {
         return releases;
     }
 
-
-
     public static void doCheckout(ProjectInfoBean info) throws GitException {
         String repoPath = info.getLocalPath();
         String tagName = info.getTag();
@@ -118,7 +123,11 @@ public class GitInteraction {
                     throw new GitException("Checkout failed on command: " + cmd + " error: " + exitCode);
                 }
             }
-        } catch (IOException | InterruptedException e) {
+        } catch (InterruptedException e) {
+            // Ripristino dello stato di interruzione del thread richiesto da Sonar
+            Thread.currentThread().interrupt();
+            throw new GitException("Checkout interrotto: " + e.getMessage());
+        } catch (IOException e) {
             throw new GitException("Error during checkout: " + e.getMessage());
         }
     }
@@ -128,7 +137,9 @@ public class GitInteraction {
         repoPath = repoPath + "/.git";
         if(git == null){
             File repoDir = new File(repoPath);
-            try{git = Git.open(repoDir);} catch (IOException e) {
+            try{
+                git = Git.open(repoDir);
+            } catch (IOException e) {
                 throw new GitException(e.getMessage());
             }
         }
@@ -147,31 +158,30 @@ public class GitInteraction {
         }
     }
 
-
     public static Set<String> getBuggyMessageID(ProjectInfoBean info) throws GitException {
         Git currentGit = getGit(info);
         Set<String> foundTicketIds = new HashSet<>();
 
         String projectName = info.getProjectName().toUpperCase();
-        java.util.regex.Pattern pattern = java.util.regex.Pattern.compile(projectName + "-\\d+");
+        // Rimossi i fully-qualified names inutili per Pattern e Matcher
+        Pattern pattern = Pattern.compile(projectName + "-\\d+");
 
         try {
-            Iterable<org.eclipse.jgit.revwalk.RevCommit> commits = currentGit.log().all().call();
+            Iterable<RevCommit> commits = currentGit.log().all().call();
 
-            for (org.eclipse.jgit.revwalk.RevCommit commit : commits) {
+            for (RevCommit commit : commits) {
                 String message = commit.getFullMessage();
-                java.util.regex.Matcher matcher = pattern.matcher(message);
+                Matcher matcher = pattern.matcher(message);
                 while (matcher.find()) {
                     foundTicketIds.add(matcher.group());
                 }
             }
-        } catch (org.eclipse.jgit.api.errors.GitAPIException | java.io.IOException e) {
+        } catch (GitAPIException | IOException e) {
             throw new GitException("Errore in Git: " + e.getMessage());
         }
 
         return foundTicketIds;
     }
-
 
     public static List<CommitBean> extractAllCommits(ProjectInfoBean info) throws GitException {
         Git currentGit = getGit(info);
@@ -225,7 +235,7 @@ public class GitInteraction {
                     }
                 }
             }
-        } catch (org.eclipse.jgit.api.errors.GitAPIException | IOException e) {
+        } catch (GitAPIException | IOException e) {
             throw new GitException("Errore durante l'estrazione dei commit: " + e.getMessage());
         }
 

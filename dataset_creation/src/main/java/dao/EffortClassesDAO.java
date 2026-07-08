@@ -8,6 +8,7 @@ import settings.PropertiesSetter;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
@@ -23,8 +24,8 @@ public class EffortClassesDAO extends ClassesDAO{
         }
 
         try (FileWriter writer = new FileWriter(filename)) {
-            // Current date
-            LocalDate today = LocalDate.now();
+            // Current date con fuso orario esplicitato per SonarQube
+            LocalDate today = LocalDate.now(ZoneId.systemDefault());
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
             writer.write("Data: " + today.format(formatter) + "\n");
             writer.write("Posizione,Progetto,Classe,Versione,Numero Smell,Tempo di Refactoring\n");

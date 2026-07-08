@@ -80,9 +80,14 @@ public class ReleaseDAO {
         String csvSplitBy = ",";
 
         try (BufferedReader br = new BufferedReader(new FileReader(csvFile))) {
-            br.readLine();
+            // Assicuriamoci che il file non sia vuoto prima di scartare l'intestazione
+            String header = br.readLine();
+            if (header == null) {
+                return releases;
+            }
+
             while ((line = br.readLine()) != null) {
-               String[] data = line.split(csvSplitBy);
+                String[] data = line.split(csvSplitBy);
                 if (data.length >= 5) {
                     Release release = getRelease(data);
                     releases.add(release);
@@ -113,7 +118,12 @@ public class ReleaseDAO {
         String csvSplitBy = ",";
 
         try (BufferedReader br = new BufferedReader(new FileReader(csvFile))) {
-            br.readLine();
+            // Assicuriamoci che il file non sia vuoto prima di scartare l'intestazione
+            String header = br.readLine();
+            if (header == null) {
+                return releases;
+            }
+
             while ((line = br.readLine()) != null) {
                 String[] data = line.split(csvSplitBy);
                 if (data.length >= 5) {
@@ -134,7 +144,12 @@ public class ReleaseDAO {
         String csvSplitBy = ",";
 
         try (BufferedReader br = new BufferedReader(new FileReader(csvFile))) {
-            br.readLine();
+            // Assicuriamoci che il file non sia vuoto prima di scartare l'intestazione
+            String header = br.readLine();
+            if (header == null) {
+                return maxID;
+            }
+
             while ((line = br.readLine()) != null) {
                 String[] data = line.split(csvSplitBy);
                 if (data.length >= 5) {

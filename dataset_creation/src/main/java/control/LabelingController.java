@@ -14,13 +14,12 @@ import entity.Ticket;
 import exception.*;
 import settings.PropertiesSetter;
 
-import java.sql.SQLOutput;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.zip.DeflaterOutputStream;
 
 public class LabelingController extends AppController{
 
@@ -63,18 +62,13 @@ public class LabelingController extends AppController{
 
             this.allJiraReleases = JiraInteraction.getAllReleases(param);
 
-
             this.allConsideredReleases = ReleaseDAO.getEveryRelease();
-
 
             this.toLabel = DatasetDAO.getDataset(); // Dataset in RAM
 
-
             List<TicketBean> ticketFromJira = JiraInteraction.getAllTickets(param);
 
-
             this.allCommits = GitInteraction.extractAllCommits(param);
-
 
             filterTicket(param,ticketFromJira);
 
@@ -87,8 +81,6 @@ public class LabelingController extends AppController{
         } catch (ConfigException|JiraException|PersistenceException|GitException e) {
             throw new ControllerException("Error: " + e.getMessage());
         }
-
-
 
     }
 
@@ -127,10 +119,10 @@ public class LabelingController extends AppController{
             tickets.removeIf(ticket -> !ticketTrovatiSuGit.contains(ticket.getTicketID())); // 2. Rimuoviamo
             this.ticketsWithNoCommit = (initialSize - tickets.size())/(initialSize);
 
-        // We have only committed tickets
-        List<Ticket> actualTickets = new ArrayList<>();
-        for(TicketBean tick : tickets){
-            int OV = getOpening(tick);
+            // We have only committed tickets
+            List<Ticket> actualTickets = new ArrayList<>();
+            for(TicketBean tick : tickets){
+                int OV = getOpening(tick);
                 if(OV != -1){ // Not ignored
                     int possibleIV = getPossibleInjected(tick);
                     TicketDTO t = getFixed(tick);
@@ -142,26 +134,25 @@ public class LabelingController extends AppController{
                         allTickets.add(ticket);
                     }
                 }
-        }
-        this.howManyFake = Ticket.getInexisting();
-        this.howManyInconsistent = Ticket.getInconsistentTickets();
-        double card = allTickets.size();
-
-        this.howManyFake = howManyFake/card;
-        this.howManyInconsistent = howManyInconsistent/card;
-
-        List<Ticket> valid = new ArrayList<>();
-        for(Ticket t: allTickets){
-            if(t.isValid()){
-                valid.add(t);
             }
-        }
-        allTickets = valid;
+            this.howManyFake = Ticket.getInexisting();
+            this.howManyInconsistent = Ticket.getInconsistentTickets();
+            double card = allTickets.size();
+
+            this.howManyFake = howManyFake/card;
+            this.howManyInconsistent = howManyInconsistent/card;
+
+            List<Ticket> valid = new ArrayList<>();
+            for(Ticket t: allTickets){
+                if(t.isValid()){
+                    valid.add(t);
+                }
+            }
+            allTickets = valid;
 
         } catch (GitException e) {
             throw new ControllerException(e.getMessage());
         }
-
     }
 
     private void doLabeling() throws ControllerException{
@@ -197,10 +188,8 @@ public class LabelingController extends AppController{
                 }
             }
         }
-
         // In toLabel we have the labeled classes
-
-        }
+    }
 
     int getOpening(TicketBean t) {
         LocalDate l = t.getCreationDate();
@@ -253,8 +242,8 @@ public class LabelingController extends AppController{
             return -1;
         }
 
-        // 3. Prendo la data più vecchia dell'infezione
-        java.util.Collections.sort(affectedDates);
+        // 3. Prendo la data più vecchia dell'infezione (aggiornato per evitare fully-qualified name)
+        affectedDates.sort(Comparator.naturalOrder());
         LocalDate oldestDate = affectedDates.get(0);
 
         if (allConsideredReleases == null || allConsideredReleases.isEmpty()) {
@@ -268,7 +257,6 @@ public class LabelingController extends AppController{
                 return release.getProgressiveNumber();
             }
         }
-
 
         return -1;
     }
@@ -303,9 +291,7 @@ public class LabelingController extends AppController{
         // 3. Aggiorno il TicketBean con le informazioni trovate
         // Assumo che TicketBean abbia i metodi set per queste informazioni
 
-
         List<String> affected = new ArrayList<>(allAffectedClasses);
-
 
         if (allConsideredReleases == null || allConsideredReleases.isEmpty()) {
             version = -1;
@@ -322,8 +308,10 @@ public class LabelingController extends AppController{
     }
 
     private double evalPercentage(){
-        double buggyClasses = 0;
-        double allClasses = 0;
+        // Utilizzo di int per i contatori come richiesto da Sonar, per evitare perdite di precisione
+        int buggyClasses = 0;
+        int allClasses = 0;
+
         for(Release r : toLabel){
             for(Class c : r.getClasses()){
                 allClasses++;
@@ -332,8 +320,8 @@ public class LabelingController extends AppController{
                 }
             }
         }
-        return buggyClasses/allClasses;
+
+        // Divisione finale convertita in double per restituire la percentuale
+        return allClasses == 0 ? 0.0 : (double) buggyClasses / allClasses;
     }
-
-
 }

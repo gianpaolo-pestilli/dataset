@@ -47,7 +47,7 @@ public class DatasetDAO {
                 // We will complete the dataset with other iterations
                 sb.append(c.getNumOps()).append(",");
                 sb.append(c.getNumSmells()).append(",");
-                sb.append(c.getLOC()).append("");
+                sb.append(c.getLOC());
                 pw.println(sb.toString());
             }
 
@@ -124,7 +124,11 @@ public class DatasetDAO {
         String csvSplitBy = ",";
 
         try (BufferedReader br = new BufferedReader(new FileReader(filename))) {
-            br.readLine();
+            String header = br.readLine();
+            if (header == null) {
+                return toReturn; // File vuoto, evitiamo di proseguire
+            }
+
             while ((line = br.readLine()) != null) {
                 String[] data = line.split(csvSplitBy);
                 if (data.length >= 6) {
@@ -228,8 +232,11 @@ public class DatasetDAO {
         String csvSplitBy = ",";
 
         try (BufferedReader br = new BufferedReader(new FileReader(datasetFile))) {
-            // Salta l'intestazione iniziale del file CSV
-            br.readLine();
+            // Salta l'intestazione iniziale del file CSV assicurandosi che non sia vuoto
+            String header = br.readLine();
+            if (header == null) {
+                return releases;
+            }
 
             while ((line = br.readLine()) != null) {
                 String[] data = line.split(csvSplitBy);
@@ -272,8 +279,6 @@ public class DatasetDAO {
                     c.setAvgChangeSetFromBegin(Double.parseDouble(data[17].trim()));
                     c.setMaxChangeSet(Double.parseDouble(data[18].trim()));
                     c.setMaxChangeSetFromBegin(Double.parseDouble(data[19].trim()));
-
-                    // Eliminato: c.setAgeOfRelease(Long.parseLong(data[20].trim()));
 
                     c.setWAge(Double.parseDouble(data[21].trim()));
                     c.setAvgTimeBetweenCommits(Double.parseDouble(data[23].trim()));
@@ -298,8 +303,11 @@ public class DatasetDAO {
         String csvSplitBy = ",";
 
         try (BufferedReader br = new BufferedReader(new FileReader(officialDataset))) {
-            // Salta l'intestazione iniziale del file CSV
-            br.readLine();
+            // Salta l'intestazione iniziale del file CSV assicurandosi che non sia vuoto
+            String header = br.readLine();
+            if (header == null) {
+                return releases;
+            }
 
             while ((line = br.readLine()) != null) {
                 String[] data = line.split(csvSplitBy);
@@ -342,8 +350,6 @@ public class DatasetDAO {
                     c.setAvgChangeSetFromBegin(Double.parseDouble(data[17].trim()));
                     c.setMaxChangeSet(Double.parseDouble(data[18].trim()));
                     c.setMaxChangeSetFromBegin(Double.parseDouble(data[19].trim()));
-
-                    // Eliminato: c.setAgeOfRelease(Long.parseLong(data[20].trim()));
 
                     c.setWAge(Double.parseDouble(data[21].trim()));
                     c.setAvgTimeBetweenCommits(Double.parseDouble(data[23].trim()));

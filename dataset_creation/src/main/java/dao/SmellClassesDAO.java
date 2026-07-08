@@ -13,6 +13,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.time.ZoneId;
 
 public class SmellClassesDAO extends ClassesDAO {
 
@@ -23,7 +24,7 @@ public class SmellClassesDAO extends ClassesDAO {
 
         try (FileWriter writer = new FileWriter(filename)) {
             // Current date
-            LocalDate today = LocalDate.now();
+            LocalDate today = LocalDate.now(ZoneId.systemDefault());
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
             writer.write("Data: " + today.format(formatter) + "\n");
             writer.write("Posizione,Progetto,Classe,Versione,Numero Smell\n");

@@ -108,7 +108,7 @@ public class Class {
         this.authorsInRelease.add(author);
         this.numAuthors = this.authorsInRelease.size();
 
-        long commitChurn = added + deleted;
+        long commitChurn = (long) added + deleted;
         this.churn += commitChurn;
 
         // LOC e ChangeSet
