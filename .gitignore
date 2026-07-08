@@ -40,4 +40,4 @@ build/
 .DS_Store
 
 ### To be skipped ###
-dataset_creation/secret.properties
+dataset_creation/secrets.properties
