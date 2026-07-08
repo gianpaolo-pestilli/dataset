@@ -25,7 +25,6 @@ public class JiraInteraction {
 
     private static final String JIRA_API_BASE = "https://issues.apache.org/jira/rest/api/2/project/";
 
-    // Costante definita per risolvere lo smell di SonarQube sulle stringhe duplicate
     private static final String FIELD_VERSIONS = "versions";
 
     private JiraInteraction(){
@@ -33,7 +32,7 @@ public class JiraInteraction {
     }
 
     private static String fetchJson(String url) throws JiraException {
-        // Implementazione del try-with-resources per chiudere in automatico HttpClient
+
         try (HttpClient client = HttpClient.newHttpClient()) {
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create(url))
@@ -60,7 +59,6 @@ public class JiraInteraction {
         String json = fetchJson(url);
 
         JSONObject root = new JSONObject(json);
-        // Utilizzo della costante al posto della stringa letterale
         JSONArray versions = root.getJSONArray(FIELD_VERSIONS);
 
         List<ReleaseBean> releases = new ArrayList<>();
@@ -68,7 +66,7 @@ public class JiraInteraction {
         for (int i = 0; i < versions.length(); i++) {
             JSONObject v = versions.getJSONObject(i);
 
-            // Skip releases without date or not yet released
+
             if (!v.has("releaseDate") || !v.optBoolean("released", false)) continue;
 
             String id      = v.optString("id", "");
@@ -126,7 +124,7 @@ public class JiraInteraction {
         int maxResults = 1000;
         int total = 0;
 
-        // Query JQL blindata
+
         String jql = String.format(
                 "project=\"%s\" AND issueType=\"Bug\" AND (status=\"closed\" OR status=\"resolved\") AND resolution=\"fixed\"",
                 projectName
@@ -134,7 +132,7 @@ public class JiraInteraction {
         String encodedJql = URLEncoder.encode(jql, StandardCharsets.UTF_8);
 
         do {
-            // Ottimizzazione: scarichiamo solo key, created e versions
+
             String url = "https://issues.apache.org/jira/rest/api/2/search?jql=" + encodedJql +
                     "&fields=key,created,versions&startAt=" + startAt + "&maxResults=" + maxResults;
 
@@ -147,19 +145,19 @@ public class JiraInteraction {
             for (int i = 0; i < issues.length(); i++) {
                 JSONObject issue = issues.getJSONObject(i);
 
-                // 1. ID del Ticket (es. SYNCOPE-123)
+
                 String key = issue.getString("key");
 
                 JSONObject fields = issue.getJSONObject("fields");
 
-                // 2. Data di Creazione (Opening Version)
+
                 String createdStr = fields.getString("created");
-                // Tronchiamo la stringa ISO 8601 per prendere solo YYYY-MM-DD
+
                 LocalDate creationDate = LocalDate.parse(createdStr.substring(0, 10));
 
-                // 3. ID interni di Jira delle Affected Versions (Injected Versions)
+
                 List<String> affectedVersionsIds = new ArrayList<>();
-                // Utilizzo della costante al posto della stringa letterale
+
                 if (fields.has(FIELD_VERSIONS)) {
                     JSONArray versionsArray = fields.getJSONArray(FIELD_VERSIONS);
                     for (int j = 0; j < versionsArray.length(); j++) {
@@ -168,7 +166,7 @@ public class JiraInteraction {
                     }
                 }
 
-                // Costruiamo e aggiungiamo il Bean alla lista
+
                 tickets.add(new TicketBean(key, creationDate, affectedVersionsIds));
             }
 

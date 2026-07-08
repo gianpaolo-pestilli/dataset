@@ -10,9 +10,7 @@ public class CorrelationAnalyzer {
 
     private static final double SIGNIFICANCE_THRESHOLD = 0.05;
 
-    // Nome metrica -> come estrarla da un oggetto Class.
-    // Include tutte le feature numeriche disponibili in Class.java,
-    // sia la variante "in release" sia la variante "FromBegin".
+
     private static final Map<String, ToDoubleFunction<Class>> METRICS = new LinkedHashMap<>();
     static {
         METRICS.put("LOC", Class::getLoc);
@@ -50,12 +48,7 @@ public class CorrelationAnalyzer {
         METRICS.put("numSmells", Class::getNumSmells);
     }
 
-    /**
-     * @param datasetA     Dataset A completo
-     * @param datasetBPlus Dataset B+ (solo classi con NSmells > 0)
-     * @param datasetB     Dataset B sintetico (B+ con NSmells forzato a 0)
-     * @param datasetC     Dataset C (solo classi con NSmells == 0)
-     */
+
     public List<MetricContainer> computeTable(List<Release> datasetA,
                                               List<Release> datasetBPlus,
                                               List<Release> datasetB,

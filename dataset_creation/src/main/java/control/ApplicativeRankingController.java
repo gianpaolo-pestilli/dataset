@@ -63,7 +63,7 @@ public class ApplicativeRankingController extends AppController {
             if (path == null) {
                 continue;
             }
-            // Needs to be a java-file // We know that but it's to be sure
+            // Needs to be a java-file, we know that but it's to be sure
             boolean isJava = path.endsWith(".java");
 
             // Technically we have filtered this yet, but it is to be sure

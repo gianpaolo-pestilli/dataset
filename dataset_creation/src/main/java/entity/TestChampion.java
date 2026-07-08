@@ -28,10 +28,7 @@ public class TestChampion {
             "maxChangeSetFromBegin", "age"
     );
 
-    /**
-     * Applica il modello già allenato al dataset indicato e conta quante istanze
-     * vengono PREDETTE come buggy (colonna "Expected" della tabella What-If).
-     */
+
     public int predictBuggyCount(DataType type) throws WekaException {
         String datasetFile;
         switch (type){
@@ -60,11 +57,7 @@ public class TestChampion {
         return count;
     }
 
-    /**
-     * Conta quante istanze sono REALMENTE buggy nel dataset (colonna "Actual").
-     * NON usare su Dataset B: essendo sintetico (NSmells forzato a 0), non ha
-     * un valore Actual osservabile nella realtà.
-     */
+
     public int actualBuggyCount(DataType type) throws WekaException {
 
         String datasetFile;

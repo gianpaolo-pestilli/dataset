@@ -68,7 +68,6 @@ public class SmellClassesDAO extends ClassesDAO {
         return classes;
     }
 
-    // Metodo estratto per soddisfare SonarQube ed eliminare il try annidato
     private void processLine(String line, List<Class> classes) {
         String[] parts = line.split(",");
         if (parts.length >= 5) {

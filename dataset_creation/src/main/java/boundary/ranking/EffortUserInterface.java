@@ -7,7 +7,6 @@ import control.EffortRankingController;
 
 public class EffortUserInterface extends RankingUserInterface {
 
-    // Costanti per risolvere lo smell sulle stringhe letterali duplicate
     private static final String STR_MINUTI = " minuti";
     private static final String STR_MINUTO = " minuto";
     private static final String STR_ORE = " ore";
@@ -36,13 +35,11 @@ public class EffortUserInterface extends RankingUserInterface {
         return "";
     }
 
-    // Metodo rifattorizzato per abbattere drasticamente la Cognitive Complexity
     private String convertTime(Integer time){
         if (time == null || time == 0) {
             return "0" + STR_MINUTI;
         }
 
-        // Calcolo a cascata usando divisioni e resti (modulo)
         int months = time / 43200;
         int remaining = time % 43200;
 
@@ -54,7 +51,6 @@ public class EffortUserInterface extends RankingUserInterface {
 
         StringBuilder result = new StringBuilder();
 
-        // Costruzione dinamica della stringa
         appendTimePart(result, months, STR_MESE, STR_MESI);
         appendTimePart(result, days, STR_GIORNO, STR_GIORNI);
         appendTimePart(result, hours, STR_ORA, STR_ORE);
@@ -63,7 +59,6 @@ public class EffortUserInterface extends RankingUserInterface {
         return result.toString();
     }
 
-    // Metodo privato di supporto per evitare logica ripetuta e abbassare la complessità
     private void appendTimePart(StringBuilder sb, int value, String singular, String plural) {
         if (value > 0) {
             if (!(sb.isEmpty())) {

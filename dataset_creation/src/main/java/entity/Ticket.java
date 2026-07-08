@@ -21,7 +21,7 @@ public class Ticket {
 
     private boolean valid = true;
 
-    // To evaluate PROPORTION
+
     private static double proportionIncrement;
     private static int numberProportions;
 
@@ -30,13 +30,13 @@ public class Ticket {
             double num = (double) fv - iv;
             double den = (double) fv - ov;
             double proportion = num/den;
-            // Accesso esplicito alla classe per eliminare lo smell
+
             sumProportion(proportion);
         }
     }
 
 
-    // Call only after Proportion evaluation
+
     public void estimateIV(double proportion){
         if(consistent || !valid){
             return; // Nothing to do
@@ -70,7 +70,7 @@ public class Ticket {
             if((iv == -1) || (iv >= fv)){
                 // This bug doesn't exist
                 this.valid = false;
-                // Accesso esplicito alla classe per eliminare lo smell
+
                 incNotExist();
                 return;
             } else {
@@ -82,7 +82,6 @@ public class Ticket {
         if((iv == -1) || (this.ov < iv)){
             // Can't rely on IV
             this.consistent = false;
-            // Accesso esplicito alla classe per eliminare lo smell
 
             incInconsistent();
         } else {

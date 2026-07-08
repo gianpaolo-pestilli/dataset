@@ -74,16 +74,12 @@ public class TableDAO {
         return significant ? base + "*" : base;
     }
 
-    /**
-     * Disegna una tabella (header + righe) su un'immagine PNG, con bordi e
-     * larghezza colonne adattata al contenuto più lungo.
-     */
+
     private static void drawTable(String[] headers, String[][] rows, String outputFilename) throws PersistenceException {
 
         int numCols = headers.length;
         int numRows = rows.length + 1; // +1 per l'header
 
-        // Calcolo temporaneo per misurare la larghezza del testo più lungo per colonna
         BufferedImage temp = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB);
         Graphics2D measurer = temp.createGraphics();
         measurer.setFont(HEADER_FONT);
@@ -110,11 +106,9 @@ public class TableDAO {
         g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
 
-        // Sfondo bianco
         g.setColor(Color.WHITE);
         g.fillRect(0, 0, totalWidth, totalHeight);
 
-        // Header
         int x = 0;
         g.setColor(new Color(230, 230, 230));
         g.fillRect(0, 0, totalWidth, ROW_HEIGHT);
@@ -125,7 +119,6 @@ public class TableDAO {
             x += colWidths[col];
         }
 
-        // Righe
         g.setFont(CELL_FONT);
         for (int row = 0; row < rows.length; row++) {
             int y = (row + 1) * ROW_HEIGHT;
@@ -136,7 +129,6 @@ public class TableDAO {
             }
         }
 
-        // Bordi (griglia)
         g.setColor(Color.GRAY);
         int y = 0;
         for (int row = 0; row <= numRows; row++) {

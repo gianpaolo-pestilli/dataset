@@ -18,7 +18,6 @@ public class PropertiesSetter {
     private static final String FILENAME = "config.properties";
     private static final String SECRET_FILE = "secrets.properties";
 
-    // Costanti per le chiavi del file di configurazione (per eliminare le Magic Strings)
     private static final String KEY_SMELLS_TOUCHED = "smells-ranking.touched";
     private static final String KEY_SMELLS_FILE = "smells-ranking.file";
     private static final String KEY_SMELLS_COUNT = "smells-ranking.count";

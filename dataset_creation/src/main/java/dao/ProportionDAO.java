@@ -7,11 +7,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 
 public class ProportionDAO {
-    /*
-    Write on a file:
-    1. Proportion value
-    2. % buggy classes
-    */
+
     private static String filename = "proportion_info.txt";
 
     private ProportionDAO(){
@@ -29,7 +25,7 @@ public class ProportionDAO {
     }
 
     public static void writePercentage(double percentage) throws PersistenceException {
-        // Usiamo "true" nel costruttore di FileWriter per aggiungere (append) al file esistente
+
         try (FileWriter fw = new FileWriter(filename, true);
              BufferedWriter bw = new BufferedWriter(fw);
              PrintWriter out = new PrintWriter(bw)) {
@@ -40,7 +36,7 @@ public class ProportionDAO {
     }
 
     public static void writeFake(double fakes) throws PersistenceException {
-        // Usiamo "true" nel costruttore di FileWriter per aggiungere (append) al file esistente
+
         try (FileWriter fw = new FileWriter(filename, true);
              BufferedWriter bw = new BufferedWriter(fw);
              PrintWriter out = new PrintWriter(bw)) {
@@ -51,7 +47,7 @@ public class ProportionDAO {
     }
 
     public static void writeInconsistent(double inc) throws PersistenceException {
-        // Usiamo "true" nel costruttore di FileWriter per aggiungere (append) al file esistente
+
         try (FileWriter fw = new FileWriter(filename, true);
              BufferedWriter bw = new BufferedWriter(fw);
              PrintWriter out = new PrintWriter(bw)) {
@@ -63,7 +59,7 @@ public class ProportionDAO {
 
 
     public static void writeTicketWithNoCommit(double inc) throws PersistenceException {
-        // Usiamo "true" nel costruttore di FileWriter per aggiungere (append) al file esistente
+
         try (FileWriter fw = new FileWriter(filename, true);
              BufferedWriter bw = new BufferedWriter(fw);
              PrintWriter out = new PrintWriter(bw)) {

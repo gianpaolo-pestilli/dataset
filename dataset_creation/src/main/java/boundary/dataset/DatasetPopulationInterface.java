@@ -24,6 +24,6 @@ public class DatasetPopulationInterface extends UserInterface {
 
     @Override
     protected void printRelease(ReleaseBean release, int i) {
-        // Nothing to d
+        // Nothing to do
     }
 }

@@ -33,7 +33,6 @@ public class TrainChampion {
         this.classifier = c;
     }
 
-    // Stessa lista esclusa dal log-transform usata in WekaWorker
     private static final List<String> EXCLUDED_ATTRS = Arrays.asList(
             "ReleaseID", "numAuthorsFromBegin", "avgChangeSetFromBegin",
             "maxChangeSetFromBegin", "age"
@@ -45,7 +44,6 @@ public class TrainChampion {
 
         Experiment exp = classifier.getExperiment();
 
-        // 1. CARICAMENTO
         Instances dataset;
         try {
             DataSource source = new DataSource(datasetFile);
@@ -56,7 +54,6 @@ public class TrainChampion {
 
         if (dataset.classIndex() == -1) dataset.setClassIndex(dataset.numAttributes() - 1);
 
-        // 2. TRASFORMAZIONE MANUALE (LOG) - identica a WekaWorker
         for (int i = 0; i < dataset.numAttributes(); i++) {
             if (dataset.attribute(i).isNumeric() &&
                     i != dataset.classIndex() &&
@@ -69,7 +66,6 @@ public class TrainChampion {
             }
         }
 
-        // 3. SETUP CLASSIFICATORE E PIPELINE (stessa logica di WekaWorker)
         weka.classifiers.Classifier baseModel = switch (classifier.getName()) {
             case RANDOM_FOREST -> new RandomForest();
             case NAIVE_BAYES -> new NaiveBayes();
@@ -109,7 +105,6 @@ public class TrainChampion {
         }
         fc.setClassifier(baseModel);
 
-        // 4. TRAINING UNICO SU TUTTO IL DATASET (niente CV, niente split)
         try {
             fc.buildClassifier(dataset);
         } catch (Exception e) {

@@ -28,11 +28,11 @@ public class MLDatasetDAO {
 
     public static void writeResults(List<Classifier> list) throws PersistenceException{
 
-        // 1. Controlla se il file esiste già
+
         File file = new File(filename);
         boolean isNewFile = !file.exists();
 
-        // 2. Se è un file nuovo, ci stampa dentro l'header
+
         if (isNewFile) {
             try (PrintWriter writer = new PrintWriter(new FileWriter(filename, true))) {
                 writer.println(header);
@@ -41,7 +41,7 @@ public class MLDatasetDAO {
             }
         }
 
-        // 3. Procede con la scrittura di tutti gli esperimenti
+
         for(Classifier c : list){
             writeClassifier(c);
         }
@@ -60,22 +60,22 @@ public class MLDatasetDAO {
             sb.append(exp.getBalancing()).append(",");
             sb.append(exp.getValidation()).append(",");
 
-            // 2. Classifier
+
             sb.append(classf.getName()).append(",");
 
-            // 3. Accuracy, Precision, Recall, AUC, Kappa (Locale.US per il punto decimale)
+
             sb.append(String.format(Locale.US, "%.3f", classf.getAccuracy())).append(",");
             sb.append(String.format(Locale.US, "%.3f", classf.getPrecision())).append(",");
             sb.append(String.format(Locale.US, "%.3f", classf.getRecall())).append(",");
             sb.append(String.format(Locale.US, "%.3f", classf.getAuc())).append(",");
             sb.append(String.format(Locale.US, "%.3f", classf.getKappa())).append(",");
-            // 5. TP, FP, TN, FN
+
             sb.append(classf.getTp()).append(",");
             sb.append(classf.getFp()).append(",");
             sb.append(classf.getTn()).append(",");
             sb.append(classf.getFn());
 
-            // Scrive la riga nel file
+
             writer.println(sb.toString());
 
         } catch (IOException e) {
@@ -87,11 +87,7 @@ public class MLDatasetDAO {
         return dataset;
     }
 
-    /**
-     * Scrive il CSV con la tabella Actual/Expected (What-If Analysis).
-     * Sovrascrive il file ad ogni esecuzione.
-     * Nota: Dataset B non ha un valore Actual (dataset sintetico), la cella resta vuota.
-     */
+
     public static void writeAPTable(int predictedA, int actualA, int predictedBplus, int acutalBplus,
                                     int predictedB,
                                     int predictedC, int actualC) throws PersistenceException {
@@ -110,13 +106,7 @@ public class MLDatasetDAO {
         }
     }
 
-    /**
-     * Scrive il CSV con la tabella Mean/Correlation per ciascuna metrica.
-     * Sovrascrive il file ad ogni esecuzione.
-     * L'asterisco viene aggiunto al valore di correlazione quando la metrica
-     * risulta statisticamente significativa (importantForX = true).
-     * Per la riga "numSmells", la correlazione con NSmells stessa è N/A (non applicabile).
-     */
+
     public static void writeCorrTable(List<MetricContainer> containers) throws PersistenceException {
 
         try (PrintWriter writer = new PrintWriter(new FileWriter(CORR_TABLE_FILENAME, false))) {

@@ -24,7 +24,7 @@ public class EffortClassesDAO extends ClassesDAO{
         }
 
         try (FileWriter writer = new FileWriter(filename)) {
-            // Current date con fuso orario esplicitato per SonarQube
+
             LocalDate today = LocalDate.now(ZoneId.systemDefault());
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
             writer.write("Data: " + today.format(formatter) + "\n");

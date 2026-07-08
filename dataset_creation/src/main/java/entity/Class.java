@@ -28,7 +28,7 @@ public class Class {
     private String className;
     private Release release;
 
-    // --- Features Esistenti ---
+    // --- Features ---
     private long loc;
     private long numRevisions;
     private long numRevisionsFromBegin;
@@ -52,7 +52,6 @@ public class Class {
     private long numSmells;
     private boolean isBuggy;
 
-    // --- Variabili di supporto (persistenti per calcoli iterativi) ---
     private Set<String> authorsInRelease = new HashSet<>();
     private long totalLocAddedInRelease = 0;
     private long totalChangeSetInRelease = 0;
@@ -60,9 +59,6 @@ public class Class {
     private LocalDate lastTouchedInRelease = null;
     private double weightedAgeNumerator = 0.0;
 
-    // ========================================================================
-    // METODI DI ELABORAZIONE E POPOLAMENTO DATI
-    // ========================================================================
 
     public void updateFromTracker(ClassTracker tracker) {
         this.numRevisionsFromBegin = tracker.getNumRev();
@@ -71,11 +67,8 @@ public class Class {
         this.churnFromBegin = tracker.getChurn();
         this.maxLOCAddedFromBegin = tracker.getMaxLocAdded();
 
-        // Trasformate in variabili locali poiché non servono dopo il calcolo delle medie
         long totalLocAdded = tracker.getTotalLocAdded();
         long totalChangeSet = tracker.getTotalChangeSet();
-
-        // Medie storiche
         this.avgLOCAddedFromBegin = this.numRevisionsFromBegin == 0 ? 0.0 : (double) totalLocAdded / this.numRevisionsFromBegin;
         this.maxChangeSetFromBegin = tracker.getMaxChangeSet();
         this.avgChangeSetFromBegin = this.numRevisionsFromBegin == 0 ? 0.0 : (double) totalChangeSet / this.numRevisionsFromBegin;
@@ -119,7 +112,7 @@ public class Class {
         this.weightedAge = this.churn == 0 ? 0.0 : this.weightedAgeNumerator / this.churn;
     }
 
-    // --- GETTER E SETTER ---
+    // --- GETTER AND SETTER ---
 
     public String getName(){ return className; }
 

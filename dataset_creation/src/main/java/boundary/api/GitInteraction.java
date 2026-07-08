@@ -39,7 +39,7 @@ public class GitInteraction {
     }
 
     private static String fetchJson(String url) throws GitException {
-        // Utilizzo del try-with-resources permesso da Java 21 per HttpClient
+
         try (HttpClient client = HttpClient.newHttpClient()) {
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create(url))
@@ -55,7 +55,6 @@ public class GitInteraction {
             return response.body();
 
         } catch (InterruptedException e) {
-            // Ripristino dello stato di interruzione del thread richiesto da Sonar
             Thread.currentThread().interrupt();
             throw new GitException("Richiesta interrotta: " + e.getMessage());
         } catch (IOException e) {
@@ -124,7 +123,6 @@ public class GitInteraction {
                 }
             }
         } catch (InterruptedException e) {
-            // Ripristino dello stato di interruzione del thread richiesto da Sonar
             Thread.currentThread().interrupt();
             throw new GitException("Checkout interrotto: " + e.getMessage());
         } catch (IOException e) {
@@ -163,7 +161,6 @@ public class GitInteraction {
         Set<String> foundTicketIds = new HashSet<>();
 
         String projectName = info.getProjectName().toUpperCase();
-        // Rimossi i fully-qualified names inutili per Pattern e Matcher
         Pattern pattern = Pattern.compile(projectName + "-\\d+");
 
         try {
@@ -201,22 +198,20 @@ public class GitInteraction {
 
                 for (RevCommit commit : commits) {
                     Matcher matcher = pattern.matcher(commit.getFullMessage());
+                        if (!matcher.find()) {
+                            continue;
+                        }
 
-                    // Salta i commit che non contengono un ID ticket valido
-                    if (!matcher.find()) {
-                        continue;
-                    }
 
-                    // 1. Data
                     LocalDate commitDate = LocalDate.ofInstant(
                             Instant.ofEpochSecond(commit.getCommitTime()),
                             ZoneId.systemDefault()
                     );
 
-                    // 2. Classi .java toccate estratte tramite metodo privato
+
                     List<String> touchedClasses = getTouchedClasses(df, commit);
 
-                    // 3. Aggiunta alla lista (crea un bean per ogni ID ticket trovato nel messaggio)
+
                     matcher.reset();
                     while (matcher.find()) {
                         String ticketId = matcher.group();
@@ -231,7 +226,7 @@ public class GitInteraction {
         return result;
     }
 
-    // Metodo di supporto per ridurre la Cognitive Complexity di extractAllCommits
+
     private static List<String> getTouchedClasses(DiffFormatter df, RevCommit commit) throws IOException {
         List<String> touchedClasses = new ArrayList<>();
         if (commit.getParentCount() > 0) {

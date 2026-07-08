@@ -21,10 +21,9 @@ public class MLReportingController extends AppController {
             Map<String, List<ExperimentResult>> groups = data.stream()
                     .collect(Collectors.groupingBy(e -> e.cut + "-" + e.selection + "-" + e.balancing + "-" + e.validation));
 
-            // Genera grafici in memoria (byte[]) per passarli al DAO
+
             Map<String, byte[]> charts = generateAllCharts(groups);
 
-            // Persistenza delegata al DAO
             ReportDAO.saveReport(groups, charts);
             ReportDAO.generateBoxPlotPDF();
 
@@ -47,7 +46,6 @@ public class MLReportingController extends AppController {
     private byte[] generateChartBytes(List<ExperimentResult> data, String metric) throws IOException {
         CategoryChart chart = new CategoryChartBuilder().width(600).height(200).title(metric).build();
 
-        // Refactoring: uso di .toList() invece di .collect(Collectors.toList())
         List<String> labels = data.stream().map(e -> e.classifier).toList();
 
         List<Double> values = data.stream().map(e -> {
@@ -67,6 +65,6 @@ public class MLReportingController extends AppController {
 
     @Override
     public void finish() throws ControllerException {
-        // Nessun file temporaneo da pulire
+        // Nothing to do
     }
 }

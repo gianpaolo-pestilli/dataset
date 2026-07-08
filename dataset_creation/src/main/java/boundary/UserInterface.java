@@ -18,7 +18,6 @@ public abstract class UserInterface {
     public static final String ANSI_PURPLE = "\u001B[35m";
     public static final String ANSI_CYAN = "\u001B[36m";
 
-    //Remember to always print ANSI_COLOR + text + ANSI_RESET <-- Don't forget this
 
     public void begin(){
         AppController controller;

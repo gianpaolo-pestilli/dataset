@@ -144,7 +144,6 @@ public class DatasetPopulationController extends AppController {
 
             int[] churn = calculateChurn(df, diff);
 
-            // Creazione oggetto parametri
             ControlParams params = new ControlParams(churn[0], churn[1], diffs.size(), isFix, authorEmail, commitDate, projectStartDate);
 
             updateClassFeatures(path, params, globalTrackers, currentRelease);

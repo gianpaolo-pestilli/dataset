@@ -104,8 +104,7 @@ public class LabelingController extends AppController{
 
     private boolean isSameClass(String path1, String path2) {
         if (path1 == null || path2 == null) return false;
-        // Estrarre solo il nome del file (es: UserDAOImpl.java) è il modo più affidabile
-        // per mappare le classi quando cambiano cartelle nel tempo.
+        // The name of the class, not the full path
         String name1 = path1.substring(path1.lastIndexOf('/') + 1);
         String name2 = path2.substring(path2.lastIndexOf('/') + 1);
         return name1.equals(name2);
@@ -194,40 +193,37 @@ public class LabelingController extends AppController{
     int getOpening(TicketBean t) {
         LocalDate l = t.getCreationDate();
 
-        // Protezione di base
         if (allConsideredReleases == null || allConsideredReleases.isEmpty()) {
             return -1;
         }
-
-        // Regola 3: Ticket aperto prima della primissima release nota -> Ignoro
         if (l.isBefore(allConsideredReleases.get(0).getReleaseDate())) {
             return -1;
         }
 
-        // Regola 1: Finestra temporale tra una release e la successiva
+
         for (int i = 0; i < allConsideredReleases.size() - 1; i++) {
             LocalDate first = allConsideredReleases.get(i).getReleaseDate();
             LocalDate second = allConsideredReleases.get(i + 1).getReleaseDate();
 
-            // Se la data è >= first e strettamente < second
+
             if (!l.isBefore(first) && l.isBefore(second)) {
                 return allConsideredReleases.get(i).getProgressiveNumber();
             }
         }
 
-        // Regola 2: Ticket aperto dopo l'ultima release a disposizione -> Ignoro
+
         return -1;
     }
 
     public int getPossibleInjected(TicketBean ticket) {
         List<String> affectedIds = ticket.getAllAffectedVersionsID();
 
-        // Nessuna AV da Jira -> ci penserà il Proportion
+
         if (affectedIds == null || affectedIds.isEmpty()) {
             return -1;
         }
 
-        // 1. e 2. Recupero le date da Jira
+
         List<LocalDate> affectedDates = new ArrayList<>();
         for (String id : affectedIds) {
             for (bean.ReleaseBean jiraRel : allJiraReleases) {
@@ -242,7 +238,6 @@ public class LabelingController extends AppController{
             return -1;
         }
 
-        // 3. Prendo la data più vecchia dell'infezione (aggiornato per evitare fully-qualified name)
         affectedDates.sort(Comparator.naturalOrder());
         LocalDate oldestDate = affectedDates.get(0);
 
@@ -250,9 +245,9 @@ public class LabelingController extends AppController{
             return -1;
         }
 
-        // 4. Mappatura esatta o successiva (Regola di Y)
+
         for (Release release : allConsideredReleases) {
-            // !release.getReleaseDate().isBefore(oldestDate) equivale a: releaseDate >= oldestDate
+
             if (!release.getReleaseDate().isBefore(oldestDate)) {
                 return release.getProgressiveNumber();
             }
@@ -262,7 +257,7 @@ public class LabelingController extends AppController{
     }
 
     public TicketDTO getFixed(TicketBean ticket) {
-        // 1. Filtro i commit che appartengono a questo ticket
+
         List<CommitBean> commitsPerTicket = new ArrayList<>();
         int version = -1;
 
@@ -276,7 +271,7 @@ public class LabelingController extends AppController{
             version = -1;
         }
 
-        // 2. Aggrego classi (Set per evitare duplicati) e trovo data più recente
+
         Set<String> allAffectedClasses = new HashSet<>();
         LocalDate latestDate = null;
 
@@ -288,8 +283,7 @@ public class LabelingController extends AppController{
             }
         }
 
-        // 3. Aggiorno il TicketBean con le informazioni trovate
-        // Assumo che TicketBean abbia i metodi set per queste informazioni
+
 
         List<String> affected = new ArrayList<>(allAffectedClasses);
 
@@ -308,7 +302,7 @@ public class LabelingController extends AppController{
     }
 
     private double evalPercentage(){
-        // Utilizzo di int per i contatori come richiesto da Sonar, per evitare perdite di precisione
+
         int buggyClasses = 0;
         int allClasses = 0;
 
@@ -321,7 +315,7 @@ public class LabelingController extends AppController{
             }
         }
 
-        // Divisione finale convertita in double per restituire la percentuale
+
         return allClasses == 0 ? 0.0 : (double) buggyClasses / allClasses;
     }
 }

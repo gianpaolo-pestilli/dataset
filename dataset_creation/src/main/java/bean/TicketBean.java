@@ -6,10 +6,9 @@ import java.util.List;
 public class TicketBean {
 
     private String ticketID;
-    private LocalDate creationDate; // OV
-    private List<String> allAffectedVersionsID; // IVs (ID interni di Jira, es. "144434")
+    private LocalDate creationDate;
+    private List<String> allAffectedVersionsID;
 
-    // Campi che verranno popolati successivamente da Git
     private int fvReleaseID;
     private List<String> affectedClasses;
 

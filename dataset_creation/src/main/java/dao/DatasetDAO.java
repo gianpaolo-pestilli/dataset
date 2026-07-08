@@ -110,7 +110,7 @@ public class DatasetDAO {
                 sb.append(c.getAvgTimeBetweenCommits()).append(",");
                 sb.append(c.getNumSmells()).append(",");
 
-                // Forzato a false come richiesto
+
                 sb.append("false");
 
                 pw.println(sb.toString());
@@ -130,7 +130,7 @@ public class DatasetDAO {
         try (BufferedReader br = new BufferedReader(new FileReader(filename))) {
             String header = br.readLine();
             if (header == null) {
-                return toReturn; // File vuoto, evitiamo di proseguire
+                return toReturn;
             }
 
             while ((line = br.readLine()) != null) {
@@ -236,7 +236,7 @@ public class DatasetDAO {
         String csvSplitBy = ",";
 
         try (BufferedReader br = new BufferedReader(new FileReader(DATASET_FILE))) {
-            // Salta l'intestazione iniziale del file CSV assicurandosi che non sia vuoto
+
             String header = br.readLine();
             if (header == null) {
                 return releases;
@@ -248,11 +248,11 @@ public class DatasetDAO {
                 if (data.length >= 26) {
                     int releaseId = Integer.parseInt(data[2].trim());
 
-                    // Se incontriamo un nuovo ReleaseID, istanziamo un nuovo oggetto Release
+
                     if (currentReleaseId != releaseId) {
                         currentRelease = new Release(data[0].trim(),releaseId);
 
-                        // L'età viene letta dal CSV e impostata alla Release una sola volta
+
                         currentRelease.setAge(Long.parseLong(data[20].trim()));
 
                         releases.add(currentRelease);
@@ -307,7 +307,7 @@ public class DatasetDAO {
         String csvSplitBy = ",";
 
         try (BufferedReader br = new BufferedReader(new FileReader(OFFICIAL_DATASET))) {
-            // Salta l'intestazione iniziale del file CSV assicurandosi che non sia vuoto
+
             String header = br.readLine();
             if (header == null) {
                 return releases;
@@ -319,11 +319,11 @@ public class DatasetDAO {
                 if (data.length >= 26) {
                     int releaseId = Integer.parseInt(data[2].trim());
 
-                    // Se incontriamo un nuovo ReleaseID, istanziamo un nuovo oggetto Release
+
                     if (currentReleaseId != releaseId) {
                         currentRelease = new Release(data[0].trim(),releaseId);
 
-                        // L'età viene letta dal CSV e impostata alla Release una sola volta
+
                         currentRelease.setAge(Long.parseLong(data[20].trim()));
 
                         releases.add(currentRelease);

@@ -16,7 +16,7 @@ public class Release {
 
     private int progressiveNumber; // Useful for Proportion
 
-    private long age; // Questa ora conterrà le settimane
+    private long age;
 
     private List<Class> classes = new ArrayList<>();
 
@@ -96,7 +96,7 @@ public class Release {
     }
 
     public void setClasses(List<Class> classes){
-        //Use this only if you know the classes already refer to the original release
+
         this.classes = classes;
 
         //Only to be safe

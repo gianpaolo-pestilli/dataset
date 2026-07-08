@@ -26,24 +26,24 @@ public class MLController extends AppController{
 
         this.classifiers = ExperimentGenerator.generateClassifiers();
 
-        // We have all the experiments now
+
 
         userBoundary.printMessage(new MessageBean("Trovati " + classifiers.size() + " esperimenti da lanciare. Avvio " + numThreads + " thread..."));
 
-        // Questa lista ci serve per tenere traccia dello stato di avanzamento di ogni singolo task
+
         List<Future<?>> futures = new ArrayList<>();
         String name = MLDatasetDAO.getDataset();
 
-        // 2. Creiamo il "Pool" (la squadra) usando il try-with-resources (supportato per ExecutorService da Java 19+)
+
         try (ExecutorService executor = Executors.newFixedThreadPool(numThreads)) {
 
-            // 3. Buttiamo tutti gli esperimenti nella cesta (la coda dell'executor)
+
             for (Classifier cls : classifiers) {
 
-                // submit() dice al Pool: "Appena hai un thread libero, fagli eseguire questo blocco di codice"
+
                 futures.add(executor.submit(() -> {
 
-                    // --- DA QUI IN POI SIAMO IN UN THREAD PARALLELO ---
+
                     try {
                         long startTime = System.currentTimeMillis();
 
@@ -62,22 +62,21 @@ public class MLController extends AppController{
                 }));
             }
 
-            // 4. Diciamo all'Executor che non aggiungeremo altri esperimenti alla cesta
+
             executor.shutdown();
 
-            // 5. Il thread principale (Main) ora deve ASPETTARE che tutti i worker abbiano finito
+
             for (Future<?> f : futures) {
                 try {
-                    f.get(); // Il metodo get() "blocca" l'esecuzione finché quel task specifico non è terminato
+                    f.get();
                 } catch (InterruptedException e) {
-                    // Ripristino dello stato di interruzione del thread richiesto da Sonar
                     Thread.currentThread().interrupt();
                     throw new ControllerException("Attesa dei thread interrotta: " + e.getMessage());
                 } catch (ExecutionException e) {
                     throw new ControllerException("Errore critico durante l'esecuzione del task: " + e.getMessage());
                 }
             }
-        } // Alla fine di questo blocco, il try-with-resources si assicura di chiamare close() sull'executor
+        }
 
         userBoundary.printMessage(new MessageBean("Tutti gli esperimenti di Machine Learning sono terminati con successo!"));
 

@@ -37,7 +37,7 @@ public class SonarCloudInteraction {
 
     //  Calling the API...
     private static String fetchJson(String url) throws SonarException {
-        // Implementazione del try-with-resources per chiudere in automatico HttpClient
+
         try (HttpClient client = HttpClient.newHttpClient()) {
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create(url))
@@ -52,7 +52,7 @@ public class SonarCloudInteraction {
             return response.body();
 
         } catch (InterruptedException e) {
-            // Ripristino dello stato di interruzione del thread richiesto da Sonar
+
             Thread.currentThread().interrupt();
             throw new SonarException(e.getMessage());
         } catch (IOException e) {
@@ -230,7 +230,7 @@ public class SonarCloudInteraction {
             }
 
         } catch (InterruptedException e) {
-            // Ripristino dello stato di interruzione del thread richiesto da Sonar
+
             Thread.currentThread().interrupt();
             throw new SonarException("Error while scanning (Interrupted): " + e.getMessage());
         } catch (IOException e) {
