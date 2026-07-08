@@ -4,6 +4,11 @@ import boundary.UserInterface;
 import exception.ConfigException;
 
 public class ApplicationStarter {
+
+    private ApplicationStarter() {
+        // Private constructor to prevent instantiation
+    }
+
     public static void launch() {
         try{
             UserInterface ui = PropertiesSetter.getUI();

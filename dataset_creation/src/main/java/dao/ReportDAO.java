@@ -29,6 +29,10 @@ public class ReportDAO {
     private static final String METRIC_KAPPA = "Kappa";
     private static final String FONT_SANS_SERIF = "SansSerif";
 
+    private ReportDAO(){
+        // Making it private
+    }
+
     public static List<ExperimentResult> loadResults() throws PersistenceException {
         try {
             return Files.readAllLines(Paths.get(PATH_CSV)).stream()

@@ -12,11 +12,6 @@ import java.util.List;
 
 public class WhatIfController extends AppController{
 
-    private String datasetA = "dataset-weka.arff";
-    private String datasetBplus = "dataset_B_plus.arff";
-    private String datasetB = "dataset_B.arff";
-    private String datasetC = "dataset_C.arff";
-
     private FilteredClassifier trainedModel;
 
     private int predictedA;

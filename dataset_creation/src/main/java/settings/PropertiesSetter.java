@@ -31,6 +31,9 @@ public class PropertiesSetter {
     private static final String KEY_DEBT_FILE = "debt-ranking.file";
     private static final String KEY_DEBT_COUNT = "debt-ranking.count";
 
+    private PropertiesSetter(){
+        // Making it private
+    }
 
     public static String getProjectName() throws ConfigException {
         Properties prop = new Properties();

@@ -22,6 +22,10 @@ public class MLDatasetDAO {
     private static final String AP_TABLE_FILENAME = "whatif-ap-table.csv";
     private static final String CORR_TABLE_FILENAME = "whatif-correlation-table.csv";
 
+    private MLDatasetDAO(){
+        // Make it private
+    }
+
     public static void writeResults(List<Classifier> list) throws PersistenceException{
 
         // 1. Controlla se il file esiste già

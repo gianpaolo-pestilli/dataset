@@ -21,6 +21,10 @@ public class TableDAO {
     private static final Font HEADER_FONT = new Font("SansSerif", Font.BOLD, 14);
     private static final Font CELL_FONT = new Font("SansSerif", Font.PLAIN, 13);
 
+    private TableDAO(){
+        // Making it private
+    }
+
     public static void writeGraphicAPTable(int predictedA, int actualA,
                                            int predictedBplus,
                                            int acutalBplus, int predictedB,

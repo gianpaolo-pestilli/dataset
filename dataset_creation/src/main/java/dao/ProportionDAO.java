@@ -14,6 +14,10 @@ public class ProportionDAO {
     */
     private static String filename = "proportion_info.txt";
 
+    private ProportionDAO(){
+        // Making it private
+    }
+
     public static void writeProportion(double proportion) throws PersistenceException {
         try (FileWriter fw = new FileWriter(filename, false);
              BufferedWriter bw = new BufferedWriter(fw);

@@ -20,6 +20,9 @@ public class ReleaseDAO {
         return ALL_RELEASES_FILENAME;
     }
     public static String getFirstReleasesFilename(){return FIRST_RELEASES_FILENAME;}
+    private ReleaseDAO(){
+        // Making it private
+    }
 
     // Not the best way to call a DAO, but I don't want a DTO which is equal to an already defined Bean
     public static void writeAllReleases(List<ReleaseBean> releases) throws PersistenceException {

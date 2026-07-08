@@ -19,6 +19,10 @@ public class DatasetDAO {
     private static final String DATASET_C = "dataset_C.csv";
     private static final String DATASET_B = "dataset_B.csv";
 
+    private DatasetDAO(){
+        // Making it private
+    }
+
     public static String getDatasetFilename(){return DATASET_FILE;}
 
     public static String getSonarDataset(){return SONAR_DATASET;}

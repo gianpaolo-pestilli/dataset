@@ -8,6 +8,9 @@ import java.util.List;
 
 public class ExperimentGenerator {
 
+    private ExperimentGenerator(){
+        // Making it private
+    }
     public static List<Classifier> generateClassifiers() {
         List<Classifier> toRet = new ArrayList<>();
 

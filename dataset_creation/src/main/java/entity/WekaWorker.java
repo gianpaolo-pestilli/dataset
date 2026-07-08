@@ -35,7 +35,7 @@ public class WekaWorker {
         Instances dataset = loadDataset();
         int buggyClassIndex = getBuggyClassIndex(dataset);
 
-        applyLogTransformation(dataset, buggyClassIndex);
+        applyLogTransformation(dataset);
 
         Experiment exp = classifier.getExperiment();
         FilteredClassifier fc = createPipeline(exp);
@@ -61,7 +61,7 @@ public class WekaWorker {
         return (index == -1) ? 1 : index;
     }
 
-    private void applyLogTransformation(Instances dataset, int buggyClassIndex) {
+    private void applyLogTransformation(Instances dataset) {
         List<String> excludedAttrs = Arrays.asList(
                 "ReleaseID", "numAuthorsFromBegin", "avgChangeSetFromBegin",
                 "maxChangeSetFromBegin", "age"
