@@ -85,7 +85,7 @@ public abstract class RankingController extends AppController {
     private void filterJava(){
         ranking = ranking.stream()
                 .filter(cb -> cb.getClassName() != null && cb.getClassName().endsWith(".java"))
-                .collect(Collectors.toList());
+                .toList();
     }
 
     protected void setRanking(List<ClassesBean> classes){

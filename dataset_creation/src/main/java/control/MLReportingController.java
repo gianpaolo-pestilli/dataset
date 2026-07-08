@@ -11,49 +11,54 @@ import java.util.stream.Collectors;
 
 public class MLReportingController extends AppController {
 
+    private static final String[] METRICS = {"Accuracy", "Precision", "Recall", "AUC", "Kappa"};
+
     @Override
     public void start() throws ControllerException {
         try {
-
             List<ExperimentResult> data = ReportDAO.loadResults();
 
             Map<String, List<ExperimentResult>> groups = data.stream()
                     .collect(Collectors.groupingBy(e -> e.cut + "-" + e.selection + "-" + e.balancing + "-" + e.validation));
 
             // Genera grafici in memoria (byte[]) per passarli al DAO
-            Map<String, byte[]> charts = new HashMap<>();
-            try {
-                for (String key : groups.keySet()) {
-                    String[] metrics = {"Accuracy", "Precision", "Recall", "AUC", "Kappa"};
-                    for (String m : metrics) {
-                        charts.put(key + "_" + m, generateChartBytes(groups.get(key), m));
-                    }
-                }
-            } catch (IOException e) {
-                throw new ControllerException(e.getMessage());
-            }
+            Map<String, byte[]> charts = generateAllCharts(groups);
 
             // Persistenza delegata al DAO
             ReportDAO.saveReport(groups, charts);
             ReportDAO.generateBoxPlotPDF();
 
-            userBoundary.printMessage(new bean.MessageBean("Report salvato in nel file "));
-        } catch (PersistenceException e) {
-            throw new ControllerException("Errore di persistenza: " + e.getMessage());
+            userBoundary.printMessage(new bean.MessageBean("Report salvato correttamente."));
+        } catch (PersistenceException | IOException e) {
+            throw new ControllerException("Errore durante l'esecuzione del reporting: " + e.getMessage());
         }
+    }
+
+    private Map<String, byte[]> generateAllCharts(Map<String, List<ExperimentResult>> groups) throws IOException {
+        Map<String, byte[]> charts = new HashMap<>();
+        for (Map.Entry<String, List<ExperimentResult>> entry : groups.entrySet()) {
+            for (String m : METRICS) {
+                charts.put(entry.getKey() + "_" + m, generateChartBytes(entry.getValue(), m));
+            }
+        }
+        return charts;
     }
 
     private byte[] generateChartBytes(List<ExperimentResult> data, String metric) throws IOException {
         CategoryChart chart = new CategoryChartBuilder().width(600).height(200).title(metric).build();
-        chart.addSeries(metric,
-                data.stream().map(e -> e.classifier).collect(Collectors.toList()),
-                data.stream().map(e -> {
-                    if (metric.equals("Accuracy")) return e.acc;
-                    if (metric.equals("Precision")) return e.prec;
-                    if (metric.equals("Recall")) return e.rec;
-                    if (metric.equals("AUC")) return e.auc;
-                    return e.kap;
-                }).collect(Collectors.toList()));
+
+        // Refactoring: uso di .toList() invece di .collect(Collectors.toList())
+        List<String> labels = data.stream().map(e -> e.classifier).toList();
+
+        List<Double> values = data.stream().map(e -> {
+            if (metric.equals("Accuracy")) return e.acc;
+            if (metric.equals("Precision")) return e.prec;
+            if (metric.equals("Recall")) return e.rec;
+            if (metric.equals("AUC")) return e.auc;
+            return e.kap;
+        }).toList();
+
+        chart.addSeries(metric, labels, values);
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         BitmapEncoder.saveBitmap(chart, baos, BitmapEncoder.BitmapFormat.PNG);
@@ -62,6 +67,6 @@ public class MLReportingController extends AppController {
 
     @Override
     public void finish() throws ControllerException {
-        // Nessun file temporaneo da pulire, abbiamo usato ByteArrayOutputStream!
+        // Nessun file temporaneo da pulire
     }
 }

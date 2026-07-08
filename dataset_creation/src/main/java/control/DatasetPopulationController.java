@@ -114,7 +114,6 @@ public class DatasetPopulationController extends AppController {
                 LocalDate commitDate = commit.getAuthorIdent().getWhen().toInstant()
                         .atZone(ZoneId.systemDefault()).toLocalDate();
 
-                // Essendo la camminata in REVERSE, il primo commit è l'inizio assoluto del progetto
                 if (projectStartDate == null) {
                     projectStartDate = commitDate;
                 }
@@ -132,11 +131,8 @@ public class DatasetPopulationController extends AppController {
         } catch (IOException e) {
             throw new ControllerException("Errore Git: " + e.getMessage());
         }
-
         propagateHistory();
     }
-
-    // --- METODI PRIVATI ESTRATTI PER ABBATTERE LA COGNITIVE COMPLEXITY DI SonarQube ---
 
     private void processCommitDiffs(DiffFormatter df, RevCommit commit, boolean isFix, String authorEmail, LocalDate commitDate, LocalDate projectStartDate, Map<String, ClassTracker> globalTrackers) throws IOException {
         List<DiffEntry> diffs = df.scan(commit.getParentCount() > 0 ? commit.getParent(0).getTree() : null, commit.getTree());
@@ -147,10 +143,11 @@ public class DatasetPopulationController extends AppController {
             if (path == null || !path.endsWith(".java") || path.toLowerCase().contains("/test/")) continue;
 
             int[] churn = calculateChurn(df, diff);
-            int added = churn[0];
-            int deleted = churn[1];
 
-            updateClassFeatures(path, added, deleted, diffs.size(), isFix, authorEmail, commitDate, projectStartDate, globalTrackers, currentRelease);
+            // Creazione oggetto parametri
+            ControlParams params = new ControlParams(churn[0], churn[1], diffs.size(), isFix, authorEmail, commitDate, projectStartDate);
+
+            updateClassFeatures(path, params, globalTrackers, currentRelease);
         }
     }
 
@@ -170,19 +167,19 @@ public class DatasetPopulationController extends AppController {
         return new int[]{added, deleted};
     }
 
-    private void updateClassFeatures(String path, int added, int deleted, int diffSize, boolean isFix, String authorEmail, LocalDate commitDate, LocalDate projectStartDate, Map<String, ClassTracker> globalTrackers, Release currentRelease) {
+    private void updateClassFeatures(String path, ControlParams params, Map<String, ClassTracker> globalTrackers, Release currentRelease) {
         ClassTracker tracker = globalTrackers.computeIfAbsent(path, k -> new ClassTracker());
         tracker.incrementNumRev();
-        if (isFix) tracker.incrementNumFix();
-        tracker.addAuthor(authorEmail);
-        tracker.addChurn(added, deleted);
-        tracker.addChangeSet(diffSize);
+        if (params.isFix()) tracker.incrementNumFix();
+        tracker.addAuthor(params.getAuthorEmail());
+        tracker.addChurn(params.getAdded(), params.getDeleted());
+        tracker.addChangeSet(params.getDiffSize());
 
         if (currentRelease != null) {
             for (Class cls : currentRelease.getClasses()) {
                 if (isSameClass(cls.getName(), path)) {
                     cls.updateFromTracker(tracker);
-                    cls.processCommitInWindow(added, deleted, diffSize, isFix, authorEmail, commitDate, projectStartDate);
+                    cls.processCommitInWindow(params.getAdded(), params.getDeleted(), params.getDiffSize(), params.isFix(), params.getAuthorEmail(), params.getCommitDate(), params.getProjectStartDate());
                     break;
                 }
             }
@@ -221,8 +218,6 @@ public class DatasetPopulationController extends AppController {
         }
     }
 
-    // --- FINE METODI ESTRATTI ---
-
     private Release getReleaseForCommit(LocalDate commitDate) {
         for (Release rel : this.releases) {
             if (!commitDate.isAfter(rel.getReleaseDate())) return rel;
@@ -232,8 +227,6 @@ public class DatasetPopulationController extends AppController {
 
     private boolean isSameClass(String sonarPath, String gitPath) {
         if (sonarPath == null || gitPath == null) return false;
-        // Estrarre solo il nome del file (es: UserDAOImpl.java) è il modo più affidabile
-        // per mappare le classi quando cambiano cartelle nel tempo.
         String name1 = sonarPath.substring(sonarPath.lastIndexOf('/') + 1);
         String name2 = gitPath.substring(gitPath.lastIndexOf('/') + 1);
         return name1.equals(name2);

@@ -39,7 +39,7 @@ public class ReportDAO {
                     .skip(1)
                     .filter(l -> !l.isBlank())
                     .map(l -> new ExperimentResult(l.split(",")))
-                    .collect(Collectors.toList());
+                    .toList();
         } catch (IOException e) {
             throw new PersistenceException("Errore durante la lettura del file CSV: " + e.getMessage());
         }
