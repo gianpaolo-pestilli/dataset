@@ -1,6 +1,7 @@
+package settings;
+
 import boundary.UserInterface;
 import exception.ConfigException;
-import settings.PropertiesSetter;
 
 public class ApplicationStarter {
     public static void launch() {

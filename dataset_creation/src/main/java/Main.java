@@ -1,3 +1,4 @@
+import settings.ApplicationStarter;
 
 public class Main {
 
