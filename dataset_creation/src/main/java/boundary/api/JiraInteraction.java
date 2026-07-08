@@ -25,6 +25,9 @@ public class JiraInteraction {
 
     private static final String JIRA_API_BASE = "https://issues.apache.org/jira/rest/api/2/project/";
 
+    // Costante definita per risolvere lo smell di SonarQube sulle stringhe duplicate
+    private static final String FIELD_VERSIONS = "versions";
+
     private JiraInteraction(){
         // Making it private
     }
@@ -57,7 +60,8 @@ public class JiraInteraction {
         String json = fetchJson(url);
 
         JSONObject root = new JSONObject(json);
-        JSONArray versions = root.getJSONArray("versions");
+        // Utilizzo della costante al posto della stringa letterale
+        JSONArray versions = root.getJSONArray(FIELD_VERSIONS);
 
         List<ReleaseBean> releases = new ArrayList<>();
 
@@ -155,8 +159,9 @@ public class JiraInteraction {
 
                 // 3. ID interni di Jira delle Affected Versions (Injected Versions)
                 List<String> affectedVersionsIds = new ArrayList<>();
-                if (fields.has("versions")) {
-                    JSONArray versionsArray = fields.getJSONArray("versions");
+                // Utilizzo della costante al posto della stringa letterale
+                if (fields.has(FIELD_VERSIONS)) {
+                    JSONArray versionsArray = fields.getJSONArray(FIELD_VERSIONS);
                     for (int j = 0; j < versionsArray.length(); j++) {
                         JSONObject versionObj = versionsArray.getJSONObject(j);
                         affectedVersionsIds.add(versionObj.getString("id"));

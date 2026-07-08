@@ -114,67 +114,91 @@ public class DatasetPopulationController extends AppController {
                 LocalDate commitDate = commit.getAuthorIdent().getWhen().toInstant()
                         .atZone(ZoneId.systemDefault()).toLocalDate();
 
-                // Essendo la camminata in REVERSE, il primo commit che incontriamo è l'inizio assoluto del progetto
+                // Essendo la camminata in REVERSE, il primo commit è l'inizio assoluto del progetto
                 if (projectStartDate == null) {
                     projectStartDate = commitDate;
                 }
 
                 if (commitDate.isAfter(lastReleaseDate)) continue;
 
-                Release currentRelease = getReleaseForCommit(commitDate);
                 boolean isFix = bugFixTickets.stream().anyMatch(commit.getFullMessage()::contains);
                 String authorEmail = commit.getAuthorIdent().getEmailAddress();
 
-                List<DiffEntry> diffs = df.scan(commit.getParentCount() > 0 ? commit.getParent(0).getTree() : null, commit.getTree());
-
-                for (DiffEntry diff : diffs) {
-                    String path = diff.getNewPath();
-                    if (path == null || !path.endsWith(".java") || path.toLowerCase().contains("/test/")) continue;
-
-                    int added = 0, deleted = 0;
-                    for (HunkHeader hunk : df.toFileHeader(diff).getHunks()) {
-                        for (Edit edit : hunk.toEditList()) {
-                            if (edit.getType() == Edit.Type.INSERT) added += edit.getEndB() - edit.getBeginB();
-                            if (edit.getType() == Edit.Type.DELETE) deleted += edit.getEndA() - edit.getBeginA();
-                            if (edit.getType() == Edit.Type.REPLACE) {
-                                deleted += edit.getEndA() - edit.getBeginA();
-                                added += edit.getEndB() - edit.getBeginB();
-                            }
-                        }
-                    }
-
-                    ClassTracker tracker = globalTrackers.computeIfAbsent(path, k -> new ClassTracker());
-                    tracker.incrementNumRev();
-                    if (isFix) tracker.incrementNumFix();
-                    tracker.addAuthor(authorEmail);
-                    tracker.addChurn(added, deleted);
-                    tracker.addChangeSet(diffs.size());
-
-                    if (currentRelease != null) {
-                        for (Class cls : currentRelease.getClasses()) {
-                            if (isSameClass(cls.getName(), path)) {
-                                cls.updateFromTracker(tracker);
-                                cls.processCommitInWindow(added, deleted, diffs.size(), isFix, authorEmail, commitDate, projectStartDate);
-                                break;
-                            }
-                        }
-                    }
-                }
+                processCommitDiffs(df, commit, isFix, authorEmail, commitDate, projectStartDate, globalTrackers);
             }
 
-            // Calcolo Age in Settimane cumulativo sulla Release
-            for (Release rel : this.releases) {
-                if (projectStartDate != null && rel.getReleaseDate() != null) {
-                    long weeks = ChronoUnit.WEEKS.between(projectStartDate, rel.getReleaseDate());
-                    rel.setAge(Math.max(0, weeks));
-                }
-            }
+            calculateReleaseAges(projectStartDate);
 
         } catch (IOException e) {
             throw new ControllerException("Errore Git: " + e.getMessage());
         }
 
-        // --- PROPAGAZIONE STORICO (Ereditarietà) ---
+        propagateHistory();
+    }
+
+    // --- METODI PRIVATI ESTRATTI PER ABBATTERE LA COGNITIVE COMPLEXITY DI SonarQube ---
+
+    private void processCommitDiffs(DiffFormatter df, RevCommit commit, boolean isFix, String authorEmail, LocalDate commitDate, LocalDate projectStartDate, Map<String, ClassTracker> globalTrackers) throws IOException {
+        List<DiffEntry> diffs = df.scan(commit.getParentCount() > 0 ? commit.getParent(0).getTree() : null, commit.getTree());
+        Release currentRelease = getReleaseForCommit(commitDate);
+
+        for (DiffEntry diff : diffs) {
+            String path = diff.getNewPath();
+            if (path == null || !path.endsWith(".java") || path.toLowerCase().contains("/test/")) continue;
+
+            int[] churn = calculateChurn(df, diff);
+            int added = churn[0];
+            int deleted = churn[1];
+
+            updateClassFeatures(path, added, deleted, diffs.size(), isFix, authorEmail, commitDate, projectStartDate, globalTrackers, currentRelease);
+        }
+    }
+
+    private int[] calculateChurn(DiffFormatter df, DiffEntry diff) throws IOException {
+        int added = 0;
+        int deleted = 0;
+        for (HunkHeader hunk : df.toFileHeader(diff).getHunks()) {
+            for (Edit edit : hunk.toEditList()) {
+                if (edit.getType() == Edit.Type.INSERT) added += edit.getEndB() - edit.getBeginB();
+                if (edit.getType() == Edit.Type.DELETE) deleted += edit.getEndA() - edit.getBeginA();
+                if (edit.getType() == Edit.Type.REPLACE) {
+                    deleted += edit.getEndA() - edit.getBeginA();
+                    added += edit.getEndB() - edit.getBeginB();
+                }
+            }
+        }
+        return new int[]{added, deleted};
+    }
+
+    private void updateClassFeatures(String path, int added, int deleted, int diffSize, boolean isFix, String authorEmail, LocalDate commitDate, LocalDate projectStartDate, Map<String, ClassTracker> globalTrackers, Release currentRelease) {
+        ClassTracker tracker = globalTrackers.computeIfAbsent(path, k -> new ClassTracker());
+        tracker.incrementNumRev();
+        if (isFix) tracker.incrementNumFix();
+        tracker.addAuthor(authorEmail);
+        tracker.addChurn(added, deleted);
+        tracker.addChangeSet(diffSize);
+
+        if (currentRelease != null) {
+            for (Class cls : currentRelease.getClasses()) {
+                if (isSameClass(cls.getName(), path)) {
+                    cls.updateFromTracker(tracker);
+                    cls.processCommitInWindow(added, deleted, diffSize, isFix, authorEmail, commitDate, projectStartDate);
+                    break;
+                }
+            }
+        }
+    }
+
+    private void calculateReleaseAges(LocalDate projectStartDate) {
+        for (Release rel : this.releases) {
+            if (projectStartDate != null && rel.getReleaseDate() != null) {
+                long weeks = ChronoUnit.WEEKS.between(projectStartDate, rel.getReleaseDate());
+                rel.setAge(Math.max(0, weeks));
+            }
+        }
+    }
+
+    private void propagateHistory() {
         for (int i = 1; i < this.releases.size(); i++) {
             Release prevRel = this.releases.get(i - 1);
             Release currRel = this.releases.get(i);
@@ -196,6 +220,8 @@ public class DatasetPopulationController extends AppController {
             }
         }
     }
+
+    // --- FINE METODI ESTRATTI ---
 
     private Release getReleaseForCommit(LocalDate commitDate) {
         for (Release rel : this.releases) {

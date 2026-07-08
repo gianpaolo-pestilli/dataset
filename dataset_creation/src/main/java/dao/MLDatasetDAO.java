@@ -19,8 +19,8 @@ public class MLDatasetDAO {
     private static String header = "Cut,Selection,Balancing,Validation,Classifier,Accuracy,Precision,Recall,AUC,Kappa,TP,FP,TN,FN";
     private static String dataset = "dataset-weka.arff";
 
-    private static final String apTableFilename = "whatif-ap-table.csv";
-    private static final String corrTableFilename = "whatif-correlation-table.csv";
+    private static final String AP_TABLE_FILENAME = "whatif-ap-table.csv";
+    private static final String CORR_TABLE_FILENAME = "whatif-correlation-table.csv";
 
     public static void writeResults(List<Classifier> list) throws PersistenceException{
 
@@ -92,7 +92,7 @@ public class MLDatasetDAO {
                                     int predictedB,
                                     int predictedC, int actualC) throws PersistenceException {
 
-        try (PrintWriter writer = new PrintWriter(new FileWriter(apTableFilename, false))) {
+        try (PrintWriter writer = new PrintWriter(new FileWriter(AP_TABLE_FILENAME, false))) {
 
             writer.println("Dataset,Actual,Expected");
 
@@ -115,7 +115,7 @@ public class MLDatasetDAO {
      */
     public static void writeCorrTable(List<MetricContainer> containers) throws PersistenceException {
 
-        try (PrintWriter writer = new PrintWriter(new FileWriter(corrTableFilename, false))) {
+        try (PrintWriter writer = new PrintWriter(new FileWriter(CORR_TABLE_FILENAME, false))) {
 
             writer.println("Variable,MeanA,MeanB_plus,MeanB,MeanC,CorrNSmells,CorrDefectiveness");
 

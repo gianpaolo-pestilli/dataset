@@ -213,19 +213,8 @@ public class GitInteraction {
                             ZoneId.systemDefault()
                     );
 
-                    // 2. Classi .java toccate (escludendo i test)
-                    List<String> touchedClasses = new ArrayList<>();
-                    if (commit.getParentCount() > 0) {
-                        RevCommit parent = commit.getParent(0);
-                        List<DiffEntry> diffs = df.scan(parent.getTree(), commit.getTree());
-
-                        for (DiffEntry diff : diffs) {
-                            String newPath = diff.getNewPath();
-                            if (newPath.endsWith(".java") && !newPath.toLowerCase().contains("test")) {
-                                touchedClasses.add(newPath);
-                            }
-                        }
-                    }
+                    // 2. Classi .java toccate estratte tramite metodo privato
+                    List<String> touchedClasses = getTouchedClasses(df, commit);
 
                     // 3. Aggiunta alla lista (crea un bean per ogni ID ticket trovato nel messaggio)
                     matcher.reset();
@@ -240,5 +229,22 @@ public class GitInteraction {
         }
 
         return result;
+    }
+
+    // Metodo di supporto per ridurre la Cognitive Complexity di extractAllCommits
+    private static List<String> getTouchedClasses(DiffFormatter df, RevCommit commit) throws IOException {
+        List<String> touchedClasses = new ArrayList<>();
+        if (commit.getParentCount() > 0) {
+            RevCommit parent = commit.getParent(0);
+            List<DiffEntry> diffs = df.scan(parent.getTree(), commit.getTree());
+
+            for (DiffEntry diff : diffs) {
+                String newPath = diff.getNewPath();
+                if (newPath.endsWith(".java") && !newPath.toLowerCase().contains("test")) {
+                    touchedClasses.add(newPath);
+                }
+            }
+        }
+        return touchedClasses;
     }
 }

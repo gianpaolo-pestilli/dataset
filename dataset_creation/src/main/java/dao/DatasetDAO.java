@@ -11,23 +11,23 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class DatasetDAO {
-    private static final String datasetFile = "dataset.csv";
-    private static final String sonarDataset = "dataset-sonar.csv";
-    private static final String officialDataset = "dataset-official.csv";
+    private static final String DATASET_FILE = "dataset.csv";
+    private static final String SONAR_DATASET = "dataset-sonar.csv";
+    private static final String OFFICIAL_DATASET = "dataset-official.csv";
 
-    private static final String datasetBPlus = "dataset_B_plus.csv";
-    private static final String datasetC = "dataset_C.csv";
-    private static final String datasetB = "dataset_B.csv";
+    private static final String DATASET_B_PLUS = "dataset_B_plus.csv";
+    private static final String DATASET_C = "dataset_C.csv";
+    private static final String DATASET_B = "dataset_B.csv";
 
-    public static String getDatasetFilename(){return datasetFile;}
+    public static String getDatasetFilename(){return DATASET_FILE;}
 
-    public static String getSonarDataset(){return sonarDataset;}
+    public static String getSonarDataset(){return SONAR_DATASET;}
 
     // To create the dataset with the SonarCloud information: the file is empty before this call
     public static void writeReleaseFirstTime(Release release) throws PersistenceException {
-        boolean isNewFile = !new File(sonarDataset).exists();
+        boolean isNewFile = !new File(SONAR_DATASET).exists();
 
-        try (FileWriter fw = new FileWriter(sonarDataset, true);
+        try (FileWriter fw = new FileWriter(SONAR_DATASET, true);
              PrintWriter pw = new PrintWriter(fw)){
 
             if (isNewFile) {
@@ -57,8 +57,8 @@ public class DatasetDAO {
     }
 
     private static void writeReleaseComplete(Release release) throws PersistenceException {
-        boolean isNewFile = !new File(datasetFile).exists();
-        try (FileWriter fw = new FileWriter(datasetFile, true);
+        boolean isNewFile = !new File(DATASET_FILE).exists();
+        try (FileWriter fw = new FileWriter(DATASET_FILE, true);
              PrintWriter pw = new PrintWriter(fw)){
 
             if (isNewFile) {
@@ -119,7 +119,7 @@ public class DatasetDAO {
 
     public static List<ClassDTO> getSonarClasses() throws PersistenceException {
         List<ClassDTO> toReturn = new ArrayList<>();
-        String filename = sonarDataset;
+        String filename = SONAR_DATASET;
         String line;
         String csvSplitBy = ",";
 
@@ -165,8 +165,8 @@ public class DatasetDAO {
 
     private static void writeLabeledRelease(Release release) throws PersistenceException {
 
-        boolean isNewFile = !new File(officialDataset).exists();
-        try (FileWriter fw = new FileWriter(officialDataset, true);
+        boolean isNewFile = !new File(OFFICIAL_DATASET).exists();
+        try (FileWriter fw = new FileWriter(OFFICIAL_DATASET, true);
              PrintWriter pw = new PrintWriter(fw)){
 
             if (isNewFile) {
@@ -231,7 +231,7 @@ public class DatasetDAO {
         String line;
         String csvSplitBy = ",";
 
-        try (BufferedReader br = new BufferedReader(new FileReader(datasetFile))) {
+        try (BufferedReader br = new BufferedReader(new FileReader(DATASET_FILE))) {
             // Salta l'intestazione iniziale del file CSV assicurandosi che non sia vuoto
             String header = br.readLine();
             if (header == null) {
@@ -302,7 +302,7 @@ public class DatasetDAO {
         String line;
         String csvSplitBy = ",";
 
-        try (BufferedReader br = new BufferedReader(new FileReader(officialDataset))) {
+        try (BufferedReader br = new BufferedReader(new FileReader(OFFICIAL_DATASET))) {
             // Salta l'intestazione iniziale del file CSV assicurandosi che non sia vuoto
             String header = br.readLine();
             if (header == null) {
@@ -430,9 +430,9 @@ public class DatasetDAO {
 
         String filename;
         switch (type){
-            case B_PLUS -> filename = datasetBPlus;
-            case C -> filename = datasetC;
-            case B -> filename = datasetB;
+            case B_PLUS -> filename = DATASET_B_PLUS;
+            case C -> filename = DATASET_C;
+            case B -> filename = DATASET_B;
             default -> throw new PersistenceException("Invalid DataType: " + type);
         }
 

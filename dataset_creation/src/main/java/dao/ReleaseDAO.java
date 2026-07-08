@@ -13,13 +13,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ReleaseDAO {
-    private static final String allReleasesFilename = "considered_releases.csv";
-    private static final String firstReleasesFilename = "first_releases.csv";
+    private static final String ALL_RELEASES_FILENAME = "considered_releases.csv";
+    private static final String FIRST_RELEASES_FILENAME = "first_releases.csv";
 
     public static String getAllReleasesFilename(){
-        return allReleasesFilename;
+        return ALL_RELEASES_FILENAME;
     }
-    public static String getFirstReleasesFilename(){return firstReleasesFilename;}
+    public static String getFirstReleasesFilename(){return FIRST_RELEASES_FILENAME;}
 
     // Not the best way to call a DAO, but I don't want a DTO which is equal to an already defined Bean
     public static void writeAllReleases(List<ReleaseBean> releases) throws PersistenceException {
@@ -75,7 +75,7 @@ public class ReleaseDAO {
     public static List<Release> getVeryFirstReleases() throws PersistenceException {
         // Return the first 33% of the releases (from first_releases.csv)
         List<Release> releases = new ArrayList<>();
-        String csvFile = firstReleasesFilename;
+        String csvFile = FIRST_RELEASES_FILENAME;
         String line;
         String csvSplitBy = ",";
 
@@ -113,7 +113,7 @@ public class ReleaseDAO {
 
     public static List<Release> getEveryRelease() throws PersistenceException {
         List<Release> releases = new ArrayList<>();
-        String csvFile = allReleasesFilename;
+        String csvFile = ALL_RELEASES_FILENAME;
         String line;
         String csvSplitBy = ",";
 
@@ -139,7 +139,7 @@ public class ReleaseDAO {
 
     public static int getMaxID() throws PersistenceException{
         int maxID = 0;
-        String csvFile = firstReleasesFilename;
+        String csvFile = FIRST_RELEASES_FILENAME;
         String line;
         String csvSplitBy = ",";
 

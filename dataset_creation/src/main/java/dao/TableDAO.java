@@ -13,8 +13,8 @@ import java.util.Locale;
 
 public class TableDAO {
 
-    private static final String apTableGraphicFilename = "whatif-ap-table.png";
-    private static final String corrTableGraphicFilename = "whatif-correlation-table.png";
+    private static final String AP_TABLE_GRAPHIC_FILENAME = "whatif-ap-table.png";
+    private static final String CORR_TABLE_GRAPHIC_FILENAME = "whatif-correlation-table.png";
 
     private static final int ROW_HEIGHT = 32;
     private static final int PADDING = 12;
@@ -35,7 +35,7 @@ public class TableDAO {
                 {"C", String.valueOf(actualC), String.valueOf(predictedC)}
         };
 
-        drawTable(headers, rows, apTableGraphicFilename);
+        drawTable(headers, rows, AP_TABLE_GRAPHIC_FILENAME);
     }
 
     public static void writeGraphicCorrTable(List<MetricContainer> containers) throws PersistenceException {
@@ -62,7 +62,7 @@ public class TableDAO {
             rows[i][6] = corrDefectStr;
         }
 
-        drawTable(headers, rows, corrTableGraphicFilename);
+        drawTable(headers, rows, CORR_TABLE_GRAPHIC_FILENAME);
     }
 
     private static String formatCorrelation(double r, boolean significant) {
