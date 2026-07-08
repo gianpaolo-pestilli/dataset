@@ -11,12 +11,12 @@ import control.MLDataController;
 public class MLDataInterface extends UserInterface{
     @Override
     protected void printClass(Integer i, ClassesBean classBean) {
-        //
+        // Nothing to do
     }
 
     @Override
     protected void printRelease(ReleaseBean release, int i) {
-        //
+        // Nothing to do
     }
 
     @Override

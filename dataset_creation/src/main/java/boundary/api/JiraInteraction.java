@@ -19,6 +19,10 @@ public class JiraInteraction {
 
     private static final String JIRA_API_BASE = "https://issues.apache.org/jira/rest/api/2/project/";
 
+    private JiraInteraction(){
+        // Making it private
+
+    }
     private static String fetchJson(String url) throws JiraException {
         HttpClient client = HttpClient.newHttpClient();
         HttpRequest request = HttpRequest.newBuilder()

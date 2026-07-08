@@ -36,7 +36,7 @@ public abstract class UserInterface {
 
     private void printErrors(Exception e){
         System.out.println(ANSI_RED + "????? Sorry, problems occurred ?????"+ ANSI_RESET);
-        System.err.println(e.getMessage());;
+        System.err.println(e.getMessage());
     }
 
     private void printInit(){

@@ -21,10 +21,14 @@ public class DatasetUserInterface extends UserInterface {
 
 
     @Override
-    public void printClasses(List<ClassesBean> classes) {}
+    public void printClasses(List<ClassesBean> classes) {
+        // Nothing to do
+    }
 
     @Override
-    protected void printClass(Integer i, ClassesBean classBean) {}
+    protected void printClass(Integer i, ClassesBean classBean) {
+        // Nothing to do
+    }
 
     @Override
     protected void printRelease(ReleaseBean rel, int i){

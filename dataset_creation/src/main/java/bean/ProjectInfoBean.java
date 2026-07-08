@@ -50,8 +50,7 @@ public class ProjectInfoBean {
         String name = getProjectName();
         String version = getReleaseVersion();
         name = name.toLowerCase();
-        String output = name + "-" + version;
-        return output;
+        return (name + "-" + version);
     }
 
     public void setLocalPath(String path){

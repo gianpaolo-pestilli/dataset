@@ -31,6 +31,9 @@ public class SonarCloudInteraction {
     private static final String METRIC_LOC = "lines";
     private static final int    PAGE_SIZE      = 500;
 
+    private SonarCloudInteraction(){
+        //Making it private
+    }
 
     //  Calling the API...
     private static String fetchJson(String url) throws SonarException {
