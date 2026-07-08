@@ -31,8 +31,7 @@ public class Ticket {
             double den = (double) fv - ov;
             double proportion = num/den;
             // Accesso esplicito alla classe per eliminare lo smell
-            Ticket.proportionIncrement += proportion;
-            Ticket.numberProportions++;
+            sumProportion(proportion);
         }
     }
 
@@ -72,7 +71,7 @@ public class Ticket {
                 // This bug doesn't exist
                 this.valid = false;
                 // Accesso esplicito alla classe per eliminare lo smell
-                Ticket.notExistingBuggy++;
+                incNotExist();
                 return;
             } else {
                 this.ov = iv;
@@ -84,7 +83,8 @@ public class Ticket {
             // Can't rely on IV
             this.consistent = false;
             // Accesso esplicito alla classe per eliminare lo smell
-            Ticket.numInconsistentIV++;
+
+            incInconsistent();
         } else {
             this.consistent = true;
             this.iv = iv;
@@ -113,4 +113,16 @@ public class Ticket {
     }
 
     public boolean isValid(){return valid;}
+
+    private static void sumProportion(double p){
+        Ticket.proportionIncrement += p;
+        Ticket.numberProportions++;
+
+    }
+    private static void incNotExist(){
+        Ticket.notExistingBuggy++;
+    }
+    private static void incInconsistent(){
+        Ticket.numInconsistentIV++;
+    }
 }

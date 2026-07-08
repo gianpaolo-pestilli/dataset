@@ -15,8 +15,8 @@ import java.util.Properties;
 
 public class PropertiesSetter {
 
-    private static final String fileName = "config.properties";
-    private static final String secretFile = "secrets.properties";
+    private static final String FILENAME = "config.properties";
+    private static final String SECRET_FILE = "secrets.properties";
 
     // Costanti per le chiavi del file di configurazione (per eliminare le Magic Strings)
     private static final String KEY_SMELLS_TOUCHED = "smells-ranking.touched";
@@ -34,7 +34,7 @@ public class PropertiesSetter {
 
     public static String getProjectName() throws ConfigException {
         Properties prop = new Properties();
-        try (InputStream input = new FileInputStream(fileName)) {
+        try (InputStream input = new FileInputStream(FILENAME)) {
             prop.load(input);
             return prop.getProperty("project.name");
         } catch (IOException e) {
@@ -44,7 +44,7 @@ public class PropertiesSetter {
 
     public static UserInterface getUI() throws ConfigException{
         Properties prop = new Properties();
-        try (InputStream input = new FileInputStream(fileName)) {
+        try (InputStream input = new FileInputStream(FILENAME)) {
             prop.load(input);
             String type = prop.getProperty("application.type");
             ApplicationType app = ApplicationType.valueOf(type);
@@ -71,7 +71,7 @@ public class PropertiesSetter {
 
     public static String getSmellRankingFile() throws ConfigException {
         Properties prop = new Properties();
-        try (InputStream input = new FileInputStream(fileName)) {
+        try (InputStream input = new FileInputStream(FILENAME)) {
             prop.load(input);
             String file = prop.getProperty(KEY_SMELLS_FILE);
             String number = prop.getProperty(KEY_SMELLS_COUNT);
@@ -85,7 +85,7 @@ public class PropertiesSetter {
             }
             prop.setProperty(KEY_SMELLS_COUNT, String.valueOf(newOne));
 
-            try(OutputStream output = new FileOutputStream(fileName)){
+            try(OutputStream output = new FileOutputStream(FILENAME)){
                 prop.store(output,null);
             }
 
@@ -98,7 +98,7 @@ public class PropertiesSetter {
 
     public static String getEffortRankingFile() throws ConfigException {
         Properties prop = new Properties();
-        try (InputStream input = new FileInputStream(fileName)) {
+        try (InputStream input = new FileInputStream(FILENAME)) {
             prop.load(input);
             String file = prop.getProperty(KEY_EFFORT_FILE);
             String number = prop.getProperty(KEY_EFFORT_COUNT);
@@ -113,7 +113,7 @@ public class PropertiesSetter {
 
             prop.setProperty(KEY_EFFORT_COUNT, String.valueOf(newOne));
 
-            try(OutputStream output = new FileOutputStream(fileName)){
+            try(OutputStream output = new FileOutputStream(FILENAME)){
                 prop.store(output,null);
             }
 
@@ -126,7 +126,7 @@ public class PropertiesSetter {
 
     public static String getSonarKey() throws ConfigException {
         Properties prop = new Properties();
-        try (InputStream input = new FileInputStream(fileName)) {
+        try (InputStream input = new FileInputStream(FILENAME)) {
             prop.load(input);
             return prop.getProperty("sonar.project.key");
         } catch (IOException e) {
@@ -136,10 +136,10 @@ public class PropertiesSetter {
 
     public static void writtenOnEffort() throws ConfigException{
         Properties prop = new Properties();
-        try (InputStream input = new FileInputStream(fileName)) {
+        try (InputStream input = new FileInputStream(FILENAME)) {
             prop.load(input);
             prop.setProperty(KEY_EFFORT_TOUCHED, "1");
-            try(OutputStream output = new FileOutputStream(fileName)){
+            try(OutputStream output = new FileOutputStream(FILENAME)){
                 prop.store(output,null);
             }
         } catch (IOException e) {
@@ -149,10 +149,10 @@ public class PropertiesSetter {
 
     public static void writtenOnSmells() throws ConfigException{
         Properties prop = new Properties();
-        try (InputStream input = new FileInputStream(fileName)) {
+        try (InputStream input = new FileInputStream(FILENAME)) {
             prop.load(input);
             prop.setProperty(KEY_SMELLS_TOUCHED, "1");
-            try(OutputStream output = new FileOutputStream(fileName)){
+            try(OutputStream output = new FileOutputStream(FILENAME)){
                 prop.store(output,null);
             }
         } catch (IOException e) {
@@ -162,7 +162,7 @@ public class PropertiesSetter {
 
     public static String getDebtRankingFile() throws ConfigException {
         Properties prop = new Properties();
-        try (InputStream input = new FileInputStream(fileName)) {
+        try (InputStream input = new FileInputStream(FILENAME)) {
             prop.load(input);
             String file = prop.getProperty(KEY_DEBT_FILE);
             String number = prop.getProperty(KEY_DEBT_COUNT);
@@ -177,7 +177,7 @@ public class PropertiesSetter {
 
             prop.setProperty(KEY_DEBT_COUNT, String.valueOf(newOne));
 
-            try(OutputStream output = new FileOutputStream(fileName)){
+            try(OutputStream output = new FileOutputStream(FILENAME)){
                 prop.store(output,null);
             }
 
@@ -190,10 +190,10 @@ public class PropertiesSetter {
 
     public static void writtenOnDebt() throws ConfigException{
         Properties prop = new Properties();
-        try (InputStream input = new FileInputStream(fileName)) {
+        try (InputStream input = new FileInputStream(FILENAME)) {
             prop.load(input);
             prop.setProperty(KEY_DEBT_TOUCHED, "1");
-            try(OutputStream output = new FileOutputStream(fileName)){
+            try(OutputStream output = new FileOutputStream(FILENAME)){
                 prop.store(output,null);
             }
         } catch (IOException e) {
@@ -203,7 +203,7 @@ public class PropertiesSetter {
 
     public static String getOwner() throws ConfigException{
         Properties prop = new Properties();
-        try (InputStream input = new FileInputStream(secretFile)) {
+        try (InputStream input = new FileInputStream(SECRET_FILE)) {
             prop.load(input);
             return prop.getProperty("project.owner");
         } catch (IOException e) {
@@ -213,7 +213,7 @@ public class PropertiesSetter {
 
     public static String getRepo() throws ConfigException{
         Properties prop = new Properties();
-        try (InputStream input = new FileInputStream(secretFile)) {
+        try (InputStream input = new FileInputStream(SECRET_FILE)) {
             prop.load(input);
             return prop.getProperty("project.repo");
         } catch (IOException e) {
@@ -223,7 +223,7 @@ public class PropertiesSetter {
 
     public static String getSonarToken() throws ConfigException{
         Properties prop = new Properties();
-        try (InputStream input = new FileInputStream(secretFile)) {
+        try (InputStream input = new FileInputStream(SECRET_FILE)) {
             prop.load(input);
             return prop.getProperty("token");
         } catch (IOException e) {
@@ -233,7 +233,7 @@ public class PropertiesSetter {
 
     public static String getProjectLocalPath() throws ConfigException{
         Properties prop = new Properties();
-        try (InputStream input = new FileInputStream(secretFile)) {
+        try (InputStream input = new FileInputStream(SECRET_FILE)) {
             prop.load(input);
             return prop.getProperty("path");
         } catch (IOException e) {
@@ -243,7 +243,7 @@ public class PropertiesSetter {
 
     public static String getApplicativeFile() throws ConfigException{
         Properties prop = new Properties();
-        try (InputStream input = new FileInputStream(fileName)) {
+        try (InputStream input = new FileInputStream(FILENAME)) {
             prop.load(input);
             return prop.getProperty("applicative-ranking.file");
         } catch (IOException e) {
@@ -253,7 +253,7 @@ public class PropertiesSetter {
 
     public static String getSonarPath() throws ConfigException {
         Properties prop = new Properties();
-        try (InputStream input = new FileInputStream(secretFile)) {
+        try (InputStream input = new FileInputStream(SECRET_FILE)) {
             prop.load(input);
             return prop.getProperty("sonar.path");
         } catch (IOException e) {
