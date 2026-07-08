@@ -1,7 +1,5 @@
 package entity;
 
-import exception.VersionException;
-
 import java.util.List;
 
 public class Ticket {
@@ -32,8 +30,9 @@ public class Ticket {
             double num = (double) FV - IV;
             double den = (double) FV - OV;
             double proportion = num/den;
-            proportionIncrement += proportion;
-            numberProportions++;
+            // Accesso esplicito alla classe per eliminare lo smell
+            Ticket.proportionIncrement += proportion;
+            Ticket.numberProportions++;
         }
     }
 
@@ -67,14 +66,13 @@ public class Ticket {
         this.FV = FV; // The only thing we know
         this.OV = OV;
 
-
-
         if(FV <= OV){
             // we want to think that programmer wanted to open the ticket at the IV
             if((IV == -1) || (IV >= FV)){
                 // This bug doesn't exist
                 this.valid = false;
-                notExistingBuggy++;
+                // Accesso esplicito alla classe per eliminare lo smell
+                Ticket.notExistingBuggy++;
                 return;
             } else {
                 this.OV = IV;
@@ -85,7 +83,8 @@ public class Ticket {
         if((IV == -1) || (this.OV < IV)){
             // Can't rely on IV
             this.consistent = false;
-            numInconsistentIV++;
+            // Accesso esplicito alla classe per eliminare lo smell
+            Ticket.numInconsistentIV++;
         } else {
             this.consistent = true;
             this.IV = IV;

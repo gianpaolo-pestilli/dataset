@@ -16,8 +16,8 @@ public class DebtUserInterface extends EffortUserInterface{
 
     @Override
     public String getDebt(ClassesBean classBean){
-        String Debt = classBean.getDebt().toString();
-        Debt = ANSI_CYAN + "Debito tecnico = " + Debt + ANSI_RESET;
-        return Debt;
+        String debt = classBean.getDebt().toString();
+        debt = ANSI_CYAN + "Debito tecnico = " + debt + ANSI_RESET;
+        return debt;
     }
 }

@@ -120,17 +120,17 @@ public class LabelingController extends AppController{
             this.ticketsWithNoCommit = (initialSize - tickets.size())/(initialSize);
 
             // We have only committed tickets
-            List<Ticket> actualTickets = new ArrayList<>();
+
             for(TicketBean tick : tickets){
-                int OV = getOpening(tick);
-                if(OV != -1){ // Not ignored
+                int ov = getOpening(tick);
+                if(ov != -1){ // Not ignored
                     int possibleIV = getPossibleInjected(tick);
                     TicketDTO t = getFixed(tick);
-                    int FV = t.index();
-                    if(FV != -1){
+                    int fv = t.index();
+                    if(fv != -1){
                         List<String> affectedClasses = t.words();
                         Ticket ticket = new Ticket(affectedClasses);
-                        ticket.setVersions(possibleIV,OV,FV);
+                        ticket.setVersions(possibleIV,ov,fv);
                         allTickets.add(ticket);
                     }
                 }
@@ -167,7 +167,7 @@ public class LabelingController extends AppController{
             }
         }
 
-        int minimum = 1;
+
         int max;
         try {
             max = ReleaseDAO.getMaxID();

@@ -120,7 +120,7 @@ public class SonarCloudInteraction {
             if (metricName.equals(measure.getString("metric"))) {
                 try {
                     return Double.parseDouble(measure.optString("value", "0.0"));
-                } catch (NumberFormatException e) {
+                } catch (NumberFormatException _) {
                     return 0.0;
                 }
             }
@@ -286,7 +286,7 @@ public class SonarCloudInteraction {
                     controller.notifyController(new MessageBean("Analysis in progress..."));
                     Thread.sleep(5000);
                 }
-            } catch (InterruptedException e) {
+            } catch (InterruptedException _) {
                 Thread.currentThread().interrupt();
                 throw new SonarException("Thread interrupted while waiting");
             }

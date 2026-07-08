@@ -1,7 +1,6 @@
 package boundary.ranking;
 
 import bean.ClassesBean;
-import bean.ReleaseBean;
 import control.AppController;
 import control.SmellRankingController;
 

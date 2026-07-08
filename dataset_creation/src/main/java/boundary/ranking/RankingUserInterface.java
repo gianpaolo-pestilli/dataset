@@ -5,14 +5,12 @@ import bean.ReleaseBean;
 import boundary.UserInterface;
 import control.AppController;
 
-import java.util.List;
 
 public abstract class RankingUserInterface extends UserInterface {
 
     @Override
     protected AppController getController(){
-        AppController controller = getRankingController();
-        return controller;
+        return getRankingController();
     }
 
     @Override

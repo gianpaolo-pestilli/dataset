@@ -28,8 +28,8 @@ import java.util.Random;
 
 public class WekaWorker {
 
-    private Classifier classifier;
-    private String datasetFile;
+    private final Classifier classifier;
+    private final String datasetFile;
 
     public WekaWorker(Classifier cls, String filepath) {
         this.classifier = cls;
@@ -37,43 +37,52 @@ public class WekaWorker {
     }
 
     public void run() throws WekaException {
+        Instances dataset = loadDataset();
+        int buggyClassIndex = getBuggyClassIndex(dataset);
 
-        // 1. CARICAMENTO
-        DataSource source = null;
-        Instances dataset = null;
+        applyLogTransformation(dataset, buggyClassIndex);
+
+        Experiment exp = classifier.getExperiment();
+        FilteredClassifier fc = createPipeline(exp);
+
+        Evaluation eval = performValidation(fc, dataset, exp);
+
+        updateMetrics(eval, buggyClassIndex);
+    }
+
+    private Instances loadDataset() throws WekaException {
         try {
-            source = new DataSource(datasetFile);
-            dataset = source.getDataSet();
+            DataSource source = new DataSource(datasetFile);
+            Instances dataset = source.getDataSet();
+            if (dataset.classIndex() == -1) dataset.setClassIndex(dataset.numAttributes() - 1);
+            return dataset;
         } catch (Exception e) {
             throw new WekaException("Errore caricamento: " + e.getMessage());
         }
+    }
 
-        if (dataset.classIndex() == -1) dataset.setClassIndex(dataset.numAttributes() - 1);
-        int buggyClassIndex = dataset.classAttribute().indexOfValue("true");
-        if (buggyClassIndex == -1) buggyClassIndex = 1;
+    private int getBuggyClassIndex(Instances dataset) {
+        int index = dataset.classAttribute().indexOfValue("true");
+        return (index == -1) ? 1 : index;
+    }
 
-        // 2. TRASFORMAZIONE MANUALE (LOG)
-        // Questa sostituisce l'uso di filtri complessi e potenzialmente errati
+    private void applyLogTransformation(Instances dataset, int buggyClassIndex) {
         List<String> excludedAttrs = Arrays.asList(
                 "ReleaseID", "numAuthorsFromBegin", "avgChangeSetFromBegin",
                 "maxChangeSetFromBegin", "age"
         );
 
         for (int i = 0; i < dataset.numAttributes(); i++) {
-            if (dataset.attribute(i).isNumeric() &&
-                    i != dataset.classIndex() &&
-                    !excludedAttrs.contains(dataset.attribute(i).name())) {
-
+            if (dataset.attribute(i).isNumeric() && i != dataset.classIndex() && !excludedAttrs.contains(dataset.attribute(i).name())) {
                 for (int j = 0; j < dataset.numInstances(); j++) {
                     double val = dataset.instance(j).value(i);
-                    // log1p calcola log(1+x), sicuro per lo zero
                     dataset.instance(j).setValue(i, Math.log1p(val));
                 }
             }
         }
+    }
 
-        // 3. SETUP CLASSIFICATORE E PIPELINE
-        Experiment exp = classifier.getExperiment();
+    private FilteredClassifier createPipeline(Experiment exp) {
         weka.classifiers.Classifier baseModel = switch (classifier.getName()) {
             case RANDOM_FOREST -> new RandomForest();
             case NAIVE_BAYES -> new NaiveBayes();
@@ -82,7 +91,6 @@ public class WekaWorker {
         };
 
         List<Filter> filterList = new ArrayList<>();
-
         if (exp.getCut() == settings.ManualCut.YES) {
             Remove removeFilter = new Remove();
             removeFilter.setAttributeIndices("1-3");
@@ -113,10 +121,12 @@ public class WekaWorker {
             fc.setFilter(mf);
         }
         fc.setClassifier(baseModel);
+        return fc;
+    }
 
-        // 4. VALIDAZIONE
-        Evaluation eval;
+    private Evaluation performValidation(FilteredClassifier fc, Instances dataset, Experiment exp) throws WekaException {
         try {
+            Evaluation eval;
             if (exp.getValidation() == settings.Validation.TEN_T_TEN_F) {
                 eval = new Evaluation(dataset);
                 for (int i = 0; i < 10; i++) {
@@ -130,11 +140,13 @@ public class WekaWorker {
                 eval = new Evaluation(train);
                 eval.evaluateModel(fc, test);
             }
+            return eval;
         } catch (Exception e) {
             throw new WekaException(e.getMessage());
         }
+    }
 
-        // 5. METRICHE
+    private void updateMetrics(Evaluation eval, int buggyClassIndex) {
         classifier.setAccuracy(eval.pctCorrect() / 100.0);
         classifier.setKappa(eval.kappa());
         classifier.setPrecision(eval.precision(buggyClassIndex));

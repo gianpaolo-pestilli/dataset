@@ -5,7 +5,6 @@ import bean.ProjectInfoBean;
 import bean.ReleaseBean;
 import boundary.api.GitInteraction;
 import boundary.api.JiraInteraction;
-import dao.DatasetDAO;
 import dao.ReleaseDAO;
 import exception.*;
 import settings.PropertiesSetter;
@@ -125,10 +124,10 @@ public class DatasetController extends AppController {
         this.allReleases = list;
     }
 
-    private void filterReleases(List<ReleaseBean> Jira, List<ReleaseBean> Git) {
+    private void filterReleases(List<ReleaseBean> jiraList, List<ReleaseBean> gitList) {
         List<ReleaseBean> toSet = new ArrayList<>();
-        for (ReleaseBean jira : Jira) {
-            for (ReleaseBean git : Git) {
+        for (ReleaseBean jira : jiraList) {
+            for (ReleaseBean git : gitList) {
                 String jiraVersion = jira.getVersion();
                 String gitVersion = git.getVersion();
                 if (jiraVersion.equalsIgnoreCase(gitVersion)) {

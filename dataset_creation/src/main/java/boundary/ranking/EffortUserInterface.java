@@ -66,7 +66,7 @@ public class EffortUserInterface extends RankingUserInterface {
     // Metodo privato di supporto per evitare logica ripetuta e abbassare la complessità
     private void appendTimePart(StringBuilder sb, int value, String singular, String plural) {
         if (value > 0) {
-            if (sb.length() > 0) {
+            if (!(sb.isEmpty())) {
                 sb.append(STR_AND);
             }
             sb.append(value).append(value > 1 ? plural : singular);

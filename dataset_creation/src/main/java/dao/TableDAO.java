@@ -22,15 +22,15 @@ public class TableDAO {
     private static final Font CELL_FONT = new Font("SansSerif", Font.PLAIN, 13);
 
     public static void writeGraphicAPTable(int predictedA, int actualA,
-                                           int predictedB_plus,
-                                           int acutalB_plus, int predictedB,
+                                           int predictedBplus,
+                                           int acutalBplus, int predictedB,
                                            int predictedC, int actualC) throws PersistenceException {
 
         String[] headers = {"Dataset", "Actual", "Expected"};
 
         String[][] rows = {
                 {"A", String.valueOf(actualA), String.valueOf(predictedA)},
-                {"B+", String.valueOf(acutalB_plus), String.valueOf(predictedB_plus)},
+                {"B+", String.valueOf(acutalBplus), String.valueOf(predictedBplus)},
                 {"B", "-", String.valueOf(predictedB)}, // Actual non disponibile: dataset sintetico
                 {"C", String.valueOf(actualC), String.valueOf(predictedC)}
         };

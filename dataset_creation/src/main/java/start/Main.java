@@ -1,3 +1,5 @@
+package start;
+
 import settings.ApplicationStarter;
 
 public class Main {

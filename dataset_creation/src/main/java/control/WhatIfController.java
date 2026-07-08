@@ -13,7 +13,7 @@ import java.util.List;
 public class WhatIfController extends AppController{
 
     private String datasetA = "dataset-weka.arff";
-    private String datasetB_plus = "dataset_B_plus.arff";
+    private String datasetBplus = "dataset_B_plus.arff";
     private String datasetB = "dataset_B.arff";
     private String datasetC = "dataset_C.arff";
 
@@ -22,8 +22,8 @@ public class WhatIfController extends AppController{
     private int predictedA;
     private int actualA;
 
-    private int predictedB_plus;
-    private int actualB_plus;
+    private int predictedBplus;
+    private int actualBplus;
 
     private int predictedB;
 
@@ -44,9 +44,9 @@ public class WhatIfController extends AppController{
     public void finish() throws ControllerException {
 
         try{
-        MLDatasetDAO.writeAPTable(predictedA,actualA,predictedB_plus, actualB_plus,predictedB,predictedC,actualC);
+        MLDatasetDAO.writeAPTable(predictedA,actualA, predictedBplus, actualBplus,predictedB,predictedC,actualC);
         MLDatasetDAO.writeCorrTable(containers);
-        TableDAO.writeGraphicAPTable(predictedA,actualA,predictedB_plus, actualB_plus,predictedB,predictedC,actualC);
+        TableDAO.writeGraphicAPTable(predictedA,actualA, predictedBplus, actualBplus,predictedB,predictedC,actualC);
         TableDAO.writeGraphicCorrTable(containers);
         } catch (PersistenceException e) {
             throw new ControllerException(e.getMessage());
@@ -75,8 +75,8 @@ public class WhatIfController extends AppController{
             predictedA = tester.predictBuggyCount(null);
             actualA = tester.actualBuggyCount(null);
 
-            predictedB_plus = tester.predictBuggyCount(DataType.B_PLUS);
-            actualB_plus = tester.actualBuggyCount(DataType.B_PLUS);
+            predictedBplus = tester.predictBuggyCount(DataType.B_PLUS);
+            actualBplus = tester.actualBuggyCount(DataType.B_PLUS);
 
             predictedB = tester.predictBuggyCount(DataType.B);
 

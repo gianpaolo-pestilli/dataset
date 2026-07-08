@@ -16,8 +16,21 @@ import java.util.Properties;
 
 public class PropertiesSetter {
 
-    private static String fileName = "config.properties";
-    private static String secretFile = "secrets.properties";
+    private static final String fileName = "config.properties";
+    private static final String secretFile = "secrets.properties";
+
+    // Costanti per le chiavi del file di configurazione (per eliminare le Magic Strings)
+    private static final String KEY_SMELLS_TOUCHED = "smells-ranking.touched";
+    private static final String KEY_SMELLS_FILE = "smells-ranking.file";
+    private static final String KEY_SMELLS_COUNT = "smells-ranking.count";
+
+    private static final String KEY_EFFORT_TOUCHED = "effort-ranking.touched";
+    private static final String KEY_EFFORT_FILE = "effort-ranking.file";
+    private static final String KEY_EFFORT_COUNT = "effort-ranking.count";
+
+    private static final String KEY_DEBT_TOUCHED = "debt-ranking.touched";
+    private static final String KEY_DEBT_FILE = "debt-ranking.file";
+    private static final String KEY_DEBT_COUNT = "debt-ranking.count";
 
 
     public static String getProjectName() throws ConfigException {
@@ -34,8 +47,8 @@ public class PropertiesSetter {
         Properties prop = new Properties();
         try (InputStream input = new FileInputStream(fileName)) {
             prop.load(input);
-            String Type = prop.getProperty("application.type");
-            ApplicationType app = ApplicationType.valueOf(Type);
+            String type = prop.getProperty("application.type");
+            ApplicationType app = ApplicationType.valueOf(type);
 
             switch (app){
                 case DATASET_INIT -> {return new DatasetUserInterface();}
@@ -57,24 +70,21 @@ public class PropertiesSetter {
         }
     }
 
-    // To avoid overriding existent files
     public static String getSmellRankingFile() throws ConfigException {
         Properties prop = new Properties();
         try (InputStream input = new FileInputStream(fileName)) {
             prop.load(input);
-            String file = prop.getProperty("smells-ranking.file");
-            String number = prop.getProperty("smells-ranking.count");
-            String touched = prop.getProperty("smells-ranking.touched");
+            String file = prop.getProperty(KEY_SMELLS_FILE);
+            String number = prop.getProperty(KEY_SMELLS_COUNT);
+            String touched = prop.getProperty(KEY_SMELLS_TOUCHED);
+
             Integer written = Integer.parseInt(touched);
-            String to_update;
             Integer newOne = Integer.parseInt(number);
             if(written == 1){
-                // The latest file has been written, so we have to create a new one
                 newOne++;
-                prop.setProperty("smells-ranking.touched", "0"); // New file is clear
+                prop.setProperty(KEY_SMELLS_TOUCHED, "0");
             }
-            to_update = String.valueOf(newOne);
-            prop.setProperty("smells-ranking.count", to_update);
+            prop.setProperty(KEY_SMELLS_COUNT, String.valueOf(newOne));
 
             try(OutputStream output = new FileOutputStream(fileName)){
                 prop.store(output,null);
@@ -83,7 +93,7 @@ public class PropertiesSetter {
             return file + number + ".csv";
 
         } catch (IOException e) {
-            throw new ConfigException("Failed to read smells-ranking.file from config.properties: " + e.getMessage());
+            throw new ConfigException("Failed to read smells-ranking config from config.properties: " + e.getMessage());
         }
     }
 
@@ -91,19 +101,18 @@ public class PropertiesSetter {
         Properties prop = new Properties();
         try (InputStream input = new FileInputStream(fileName)) {
             prop.load(input);
-            String file = prop.getProperty("effort-ranking.file");
-            String number = prop.getProperty("effort-ranking.count");
-            String touched = prop.getProperty("effort-ranking.touched");
+            String file = prop.getProperty(KEY_EFFORT_FILE);
+            String number = prop.getProperty(KEY_EFFORT_COUNT);
+            String touched = prop.getProperty(KEY_EFFORT_TOUCHED);
+
             Integer written = Integer.parseInt(touched);
-            String to_update;
             Integer newOne = Integer.parseInt(number);
             if(written == 1){
                 newOne++;
-                prop.setProperty("effort-ranking.touched", "0");
+                prop.setProperty(KEY_EFFORT_TOUCHED, "0");
             }
 
-            to_update = String.valueOf(newOne);
-            prop.setProperty("effort-ranking.count", to_update);
+            prop.setProperty(KEY_EFFORT_COUNT, String.valueOf(newOne));
 
             try(OutputStream output = new FileOutputStream(fileName)){
                 prop.store(output,null);
@@ -112,7 +121,7 @@ public class PropertiesSetter {
             return file + number + ".csv";
 
         } catch (IOException e) {
-            throw new ConfigException("Failed to read effort-ranking.file from config.properties: " + e.getMessage());
+            throw new ConfigException("Failed to read effort-ranking config from config.properties: " + e.getMessage());
         }
     }
 
@@ -120,8 +129,7 @@ public class PropertiesSetter {
         Properties prop = new Properties();
         try (InputStream input = new FileInputStream(fileName)) {
             prop.load(input);
-            String projectKey = prop.getProperty("sonar.project.key");
-            return projectKey;
+            return prop.getProperty("sonar.project.key");
         } catch (IOException e) {
             throw new ConfigException("Failed to read sonar.project.key from config.properties: " + e.getMessage());
         }
@@ -131,14 +139,12 @@ public class PropertiesSetter {
         Properties prop = new Properties();
         try (InputStream input = new FileInputStream(fileName)) {
             prop.load(input);
-            String touched = "1";
-            prop.setProperty("effort-ranking.touched", touched);
+            prop.setProperty(KEY_EFFORT_TOUCHED, "1");
             try(OutputStream output = new FileOutputStream(fileName)){
                 prop.store(output,null);
             }
-
         } catch (IOException e) {
-            throw new ConfigException("Failed to read effort-ranking.file from config.properties: " + e.getMessage());
+            throw new ConfigException("Failed to update effort-ranking.touched: " + e.getMessage());
         }
     }
 
@@ -146,14 +152,12 @@ public class PropertiesSetter {
         Properties prop = new Properties();
         try (InputStream input = new FileInputStream(fileName)) {
             prop.load(input);
-            String touched = "1";
-            prop.setProperty("smells-ranking.touched", touched);
+            prop.setProperty(KEY_SMELLS_TOUCHED, "1");
             try(OutputStream output = new FileOutputStream(fileName)){
                 prop.store(output,null);
             }
-
         } catch (IOException e) {
-            throw new ConfigException("Failed to read smells-ranking.file from config.properties: " + e.getMessage());
+            throw new ConfigException("Failed to update smells-ranking.touched: " + e.getMessage());
         }
     }
 
@@ -161,19 +165,18 @@ public class PropertiesSetter {
         Properties prop = new Properties();
         try (InputStream input = new FileInputStream(fileName)) {
             prop.load(input);
-            String file = prop.getProperty("debt-ranking.file");
-            String number = prop.getProperty("debt-ranking.count");
-            String touched = prop.getProperty("debt-ranking.touched");
+            String file = prop.getProperty(KEY_DEBT_FILE);
+            String number = prop.getProperty(KEY_DEBT_COUNT);
+            String touched = prop.getProperty(KEY_DEBT_TOUCHED);
+
             Integer written = Integer.parseInt(touched);
-            String to_update;
             Integer newOne = Integer.parseInt(number);
             if(written == 1){
                 newOne++;
-                prop.setProperty("debt-ranking.touched", "0");
+                prop.setProperty(KEY_DEBT_TOUCHED, "0");
             }
 
-            to_update = String.valueOf(newOne);
-            prop.setProperty("debt-ranking.count", to_update);
+            prop.setProperty(KEY_DEBT_COUNT, String.valueOf(newOne));
 
             try(OutputStream output = new FileOutputStream(fileName)){
                 prop.store(output,null);
@@ -182,7 +185,7 @@ public class PropertiesSetter {
             return file + number + ".csv";
 
         } catch (IOException e) {
-            throw new ConfigException("Failed to read debt-ranking.file from config.properties: " + e.getMessage());
+            throw new ConfigException("Failed to read debt-ranking config from config.properties: " + e.getMessage());
         }
     }
 
@@ -190,46 +193,40 @@ public class PropertiesSetter {
         Properties prop = new Properties();
         try (InputStream input = new FileInputStream(fileName)) {
             prop.load(input);
-            String touched = "1";
-            prop.setProperty("debt-ranking.touched", touched);
+            prop.setProperty(KEY_DEBT_TOUCHED, "1");
             try(OutputStream output = new FileOutputStream(fileName)){
                 prop.store(output,null);
             }
-
         } catch (IOException e) {
-            throw new ConfigException("Failed to read debt-ranking.file from config.properties: " + e.getMessage());
+            throw new ConfigException("Failed to update debt-ranking.touched: " + e.getMessage());
         }
     }
 
     public static String getOwner() throws ConfigException{
         Properties prop = new Properties();
         try (InputStream input = new FileInputStream(secretFile)) {
-                prop.load(input);
-                String owner = prop.getProperty("project.owner");
-                return owner;
-            } catch (IOException e) {
-                throw new ConfigException("Failed to read project.owner from secret file: " + e.getMessage());
-            }
+            prop.load(input);
+            return prop.getProperty("project.owner");
+        } catch (IOException e) {
+            throw new ConfigException("Failed to read project.owner from secret file: " + e.getMessage());
         }
+    }
 
     public static String getRepo() throws ConfigException{
         Properties prop = new Properties();
         try (InputStream input = new FileInputStream(secretFile)) {
             prop.load(input);
-            String repo = prop.getProperty("project.repo");
-            return repo;
+            return prop.getProperty("project.repo");
         } catch (IOException e) {
             throw new ConfigException("Failed to read project.repo from secret file: " + e.getMessage());
         }
     }
 
-
     public static String getSonarToken() throws ConfigException{
         Properties prop = new Properties();
         try (InputStream input = new FileInputStream(secretFile)) {
             prop.load(input);
-            String token = prop.getProperty("token");
-            return token;
+            return prop.getProperty("token");
         } catch (IOException e) {
             throw new ConfigException("Failed to read secret file: " + e.getMessage());
         }
@@ -239,10 +236,9 @@ public class PropertiesSetter {
         Properties prop = new Properties();
         try (InputStream input = new FileInputStream(secretFile)) {
             prop.load(input);
-            String path = prop.getProperty("path");
-            return path;
+            return prop.getProperty("path");
         } catch (IOException e) {
-            throw new ConfigException("Failed to read secret file: " + e.getMessage());
+            throw new ConfigException("Failed to read path from secret file: " + e.getMessage());
         }
     }
 
@@ -252,7 +248,7 @@ public class PropertiesSetter {
             prop.load(input);
             return prop.getProperty("applicative-ranking.file");
         } catch (IOException e) {
-            throw new ConfigException("Failed to read applicative-ranking.file from config.properties: " + e.getMessage());
+            throw new ConfigException("Failed to read applicative-ranking.file: " + e.getMessage());
         }
     }
 
@@ -262,9 +258,7 @@ public class PropertiesSetter {
             prop.load(input);
             return prop.getProperty("sonar.path");
         } catch (IOException e) {
-            throw new ConfigException("Failed to read project.name from secret file: " + e.getMessage());
+            throw new ConfigException("Failed to read sonar.path from secret file: " + e.getMessage());
         }
     }
-
 }
-

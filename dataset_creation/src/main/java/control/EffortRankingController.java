@@ -3,11 +3,6 @@ package control;
 import bean.ClassesBean;
 import dao.ClassesDAO;
 import dao.EffortClassesDAO;
-import dao.SmellClassesDAO;
-import exception.ConfigException;
-import exception.ControllerException;
-import settings.PropertiesSetter;
-
 import java.util.List;
 
 public class EffortRankingController extends RankingController{

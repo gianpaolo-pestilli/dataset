@@ -21,6 +21,14 @@ public class ReportDAO {
     private static final String PATH_CSV = "performance.csv";
     private static final String PATH_PDF = "Grafici_classificatori.pdf";
 
+    // --- Costanti per risolvere lo smell delle "Magic Strings" duplicate ---
+    private static final String METRIC_ACCURACY = "Accuracy";
+    private static final String METRIC_PRECISION = "Precision";
+    private static final String METRIC_RECALL = "Recall";
+    private static final String METRIC_AUC = "AUC";
+    private static final String METRIC_KAPPA = "Kappa";
+    private static final String FONT_SANS_SERIF = "SansSerif";
+
     public static List<ExperimentResult> loadResults() throws PersistenceException {
         try {
             return Files.readAllLines(Paths.get(PATH_CSV)).stream()
@@ -48,7 +56,8 @@ public class ReportDAO {
                     content.endText();
 
                     int yPos = 700;
-                    String[] metrics = {"Accuracy", "Precision", "Recall", "AUC", "Kappa"};
+                    // Utilizzo delle costanti
+                    String[] metrics = {METRIC_ACCURACY, METRIC_PRECISION, METRIC_RECALL, METRIC_AUC, METRIC_KAPPA};
                     for (String m : metrics) {
                         byte[] imgData = charts.get(entry.getKey() + "_" + m);
                         if (imgData != null) {
@@ -120,7 +129,8 @@ public class ReportDAO {
         Map<String, List<ExperimentResult>> groups = results.stream()
                 .collect(Collectors.groupingBy(r -> r.classifier));
 
-        String[] metricNames = {"Accuracy", "Precision", "Recall", "AUC", "Kappa"};
+        // Utilizzo delle costanti
+        String[] metricNames = {METRIC_ACCURACY, METRIC_PRECISION, METRIC_RECALL, METRIC_AUC, METRIC_KAPPA};
         Map<String, Map<String, List<Double>>> metricData = new LinkedHashMap<>();
 
         for (String metric : metricNames) {
@@ -130,11 +140,12 @@ public class ReportDAO {
                 List<Double> values = new ArrayList<>();
                 for (ExperimentResult r : entry.getValue()) {
                     switch (metric) {
-                        case "Accuracy": values.add(r.acc); break;
-                        case "Precision": values.add(r.prec); break;
-                        case "Recall": values.add(r.rec); break;
-                        case "AUC": values.add(r.auc); break;
-                        case "Kappa": values.add(r.kap); break;
+                        case METRIC_ACCURACY: values.add(r.acc); break;
+                        case METRIC_PRECISION: values.add(r.prec); break;
+                        case METRIC_RECALL: values.add(r.rec); break;
+                        case METRIC_AUC: values.add(r.auc); break;
+                        case METRIC_KAPPA: values.add(r.kap); break;
+                        default: break; // Aggiunto il default case per SonarQube
                     }
                 }
                 classifierValues.put(cl, values);
@@ -198,7 +209,7 @@ public class ReportDAO {
 
         // ----- TITOLO -----
         g.setColor(Color.BLACK);
-        g.setFont(new Font("SansSerif", Font.BOLD, 18));
+        g.setFont(new Font(FONT_SANS_SERIF, Font.BOLD, 18));
         String title = "Box Plot - " + metricName;
         int titleWidth = g.getFontMetrics().stringWidth(title);
         g.drawString(title, (width - titleWidth) / 2, marginTop - 20);
@@ -210,7 +221,7 @@ public class ReportDAO {
         g.drawLine(marginLeft, marginTop + plotHeight, marginLeft + plotWidth, marginTop + plotHeight);
 
         // ----- TICK Y -----
-        g.setFont(new Font("SansSerif", Font.PLAIN, 11));
+        g.setFont(new Font(FONT_SANS_SERIF, Font.PLAIN, 11));
         for (double v = 0.0; v <= 1.0; v += 0.1) {
             int yTick = (int) (yBase - (v / yMax) * plotHeight);
             g.drawLine(marginLeft - 6, yTick, marginLeft, yTick);
@@ -218,7 +229,7 @@ public class ReportDAO {
         }
 
         // ----- ETICHETTA ASSE Y -----
-        g.setFont(new Font("SansSerif", Font.BOLD, 12));
+        g.setFont(new Font(FONT_SANS_SERIF, Font.BOLD, 12));
         g.drawString("Metric Value", marginLeft - 70, marginTop - 10);
 
         // ----- CLASSIFICATORI E COLORI -----
@@ -259,7 +270,7 @@ public class ReportDAO {
             // ----- ETICHETTA SOTTO L'ASSE X -----
             String label = cl.replace("_", " ");
             g.setColor(Color.BLACK);
-            g.setFont(new Font("SansSerif", Font.BOLD, 12));
+            g.setFont(new Font(FONT_SANS_SERIF, Font.BOLD, 12));
             int labelWidth = g.getFontMetrics().stringWidth(label);
             g.drawString(label, currentX + boxWidth / 2 - labelWidth / 2, marginTop + plotHeight + 55);
 
@@ -301,14 +312,14 @@ public class ReportDAO {
         g.setColor(Color.BLACK);
         g.setStroke(new BasicStroke(1.0f));
         g.drawRoundRect(legX, legY, legWidth, legHeight, 8, 8);
-        g.setFont(new Font("SansSerif", Font.BOLD, 11));
+        g.setFont(new Font(FONT_SANS_SERIF, Font.BOLD, 11));
         g.drawString("Classifiers", legX + 12, legY + 18);
 
         for (int i = 0; i < classifiers.length; i++) {
             g.setColor(colors[i]);
             g.fillRect(legX + 12, legY + 28 + i * 24, 15, 15);
             g.setColor(Color.BLACK);
-            g.setFont(new Font("SansSerif", Font.PLAIN, 10));
+            g.setFont(new Font(FONT_SANS_SERIF, Font.PLAIN, 10));
             String shortName = classifiers[i].replace("_", " ");
             g.drawString(shortName, legX + 35, legY + 39 + i * 24);
         }

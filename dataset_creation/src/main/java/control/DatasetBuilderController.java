@@ -82,7 +82,7 @@ public class DatasetBuilderController extends AppController{
     @Override
     public void finish() throws ControllerException {
         String filename = DatasetDAO.getSonarDataset();
-        MessageBean mess = new MessageBean("First steps of dataset building are in this file: " +filename);
+
     }
 
     private void checkout(ProjectInfoBean project) throws ControllerException {

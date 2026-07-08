@@ -103,10 +103,10 @@ public class ReleaseDAO {
         int progressiveNumber = Integer.parseInt(data[0].trim());
         String projectName = data[1].trim();
         String tag = data[2].trim();
-        String JiraID = data[3].trim();
+        String jiraId = data[3].trim();
         String releaseDateStr = data[4].trim();
         LocalDate releaseDate = LocalDate.parse(releaseDateStr);
-        Release release = new Release(projectName,releaseDate,JiraID,tag);
+        Release release = new Release(projectName,releaseDate,jiraId,tag);
         release.setProgressiveNumber(progressiveNumber);
         return release;
     }
