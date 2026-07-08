@@ -80,7 +80,7 @@ public class CorrelationAnalyzer {
             MetricContainer container = new MetricContainer();
             container.setMetricName(metricName);
             container.setMeanA(mean(classesA, extractor));
-            container.setMeanB_plus(mean(classesBPlus, extractor));
+            container.setMeanBplus(mean(classesBPlus, extractor));
             container.setMeanB(mean(classesB, extractor));
             container.setMeanC(mean(classesC, extractor));
 

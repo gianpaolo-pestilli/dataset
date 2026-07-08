@@ -13,7 +13,7 @@ import java.util.List;
 public class TestChampion {
 
     private String datasetA = "dataset-weka.arff";
-    private String datasetB_plus = "dataset_B_plus.arff";
+    private String datasetBplus = "dataset_B_plus.arff";
     private String datasetB = "dataset_B.arff";
     private String datasetC = "dataset_C.arff";
 
@@ -36,7 +36,7 @@ public class TestChampion {
         String datasetFile;
         switch (type){
             case B -> datasetFile = datasetB;
-            case B_PLUS -> datasetFile = datasetB_plus;
+            case B_PLUS -> datasetFile = datasetBplus;
             case C -> datasetFile = datasetC;
             case null,default -> datasetFile = datasetA;
         }
@@ -70,7 +70,7 @@ public class TestChampion {
         String datasetFile;
         switch (type){
             case B -> datasetFile = datasetB;
-            case B_PLUS -> datasetFile = datasetB_plus;
+            case B_PLUS -> datasetFile = datasetBplus;
             case C -> datasetFile = datasetC;
             case null, default -> datasetFile = datasetA;
         }

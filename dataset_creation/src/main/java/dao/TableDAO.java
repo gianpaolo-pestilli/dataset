@@ -55,7 +55,7 @@ public class TableDAO {
 
             rows[i][0] = c.getMetricName();
             rows[i][1] = String.format(Locale.US, "%.2f", c.getMeanA());
-            rows[i][2] = String.format(Locale.US, "%.2f", c.getMeanB_plus());
+            rows[i][2] = String.format(Locale.US, "%.2f", c.getMeanBplus());
             rows[i][3] = String.format(Locale.US, "%.2f", c.getMeanB());
             rows[i][4] = String.format(Locale.US, "%.2f", c.getMeanC());
             rows[i][5] = corrSmellsStr;

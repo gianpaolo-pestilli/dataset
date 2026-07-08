@@ -1,9 +1,21 @@
 package entity;
 
 public class ExperimentResult {
-    public String cut, selection, balancing, validation, classifier;
-    public double acc, prec, rec, auc, kap;
-    public int tp, fp, tn, fn;
+    public String cut;
+    public String selection;
+    public String balancing;
+    public String validation;
+    public String classifier;
+
+    public double acc;
+    public double prec;
+    public double rec;
+    public double auc;
+    public double kap;
+    public int tp;
+    public int  fp;
+    public int tn;
+    public int  fn;
 
     public ExperimentResult(String[] v) {
         this.cut = v[0]; this.selection = v[1]; this.balancing = v[2];

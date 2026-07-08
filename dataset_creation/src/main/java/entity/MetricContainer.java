@@ -4,7 +4,7 @@ public class MetricContainer {
     private String metricName;
     private double meanA;
     private double meanB;
-    private double meanB_plus;
+    private double meanBplus;
     private double meanC;
     private double corrWithDefects;
     private double corrWithSmells;
@@ -35,12 +35,12 @@ public class MetricContainer {
         this.meanB = meanB;
     }
 
-    public double getMeanB_plus() {
-        return meanB_plus;
+    public double getMeanBplus() {
+        return meanBplus;
     }
 
-    public void setMeanB_plus(double meanB_plus) {
-        this.meanB_plus = meanB_plus;
+    public void setMeanBplus(double meanBplus) {
+        this.meanBplus = meanBplus;
     }
 
     public double getMeanC() {

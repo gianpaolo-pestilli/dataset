@@ -130,7 +130,7 @@ public class MLDatasetDAO {
                 StringBuilder sb = new StringBuilder();
                 sb.append(c.getMetricName()).append(",");
                 sb.append(String.format(Locale.US, "%.2f", c.getMeanA())).append(",");
-                sb.append(String.format(Locale.US, "%.2f", c.getMeanB_plus())).append(",");
+                sb.append(String.format(Locale.US, "%.2f", c.getMeanBplus())).append(",");
                 sb.append(String.format(Locale.US, "%.2f", c.getMeanB())).append(",");
                 sb.append(String.format(Locale.US, "%.2f", c.getMeanC())).append(",");
                 sb.append(corrSmellsStr).append(",");

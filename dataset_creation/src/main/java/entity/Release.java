@@ -51,8 +51,8 @@ public class Release {
         classes.add(newClass);
     }
 
-    public void addClass(String classname,int numSmell,int numOps, int LOC){
-        Class newClass = new Class(this, classname,numSmell,numOps,LOC);
+    public void addClass(String classname,int numSmell,int numOps, int loc){
+        Class newClass = new Class(this, classname,numSmell,numOps,loc);
         classes.add(newClass);
     }
 

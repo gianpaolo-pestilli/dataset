@@ -1,7 +1,5 @@
 package entity;
 
-import java.util.ArrayList;
-import java.util.List;
 
 public class LabelClass {
     private String classname;
